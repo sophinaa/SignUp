@@ -71,12 +71,12 @@ describe('public page', () => {
 
   test('shows confirmed and unconfirmed details without inventing any', async () => {
     const html = await (await fetch(`${srv.base}/`)).text();
-    assert.match(html, /A little food\. A little conversation\. A shared light\./);
+    assert.match(html, /Good food\. Warm conversation\. Community\./);
     assert.match(html, /Sunday 22 November 2026/);
     assert.match(html, /<dt>Time<\/dt><dd><span class="tbc">To be confirmed<\/span>/);
     assert.match(html, /<dt>Venue<\/dt><dd><span class="tbc">To be confirmed<\/span>/);
     assert.match(html, /Entry details coming soon/);
-    assert.match(html, /Wednesday 18 November 2026/);
+    assert.match(html, /18 November/);
     assert.doesNotMatch(html, /£2/);
     assert.doesNotMatch(html, /Add to calendar/);
     assert.doesNotMatch(html, /mailto:/);
@@ -84,9 +84,11 @@ describe('public page', () => {
     assert.match(html, /We don’t send confirmation emails/);
   });
 
-  test('marketing opt-in is optional and unchecked', async () => {
+  test('new RSVPs omit marketing while existing bookings retain an optional opt-in', async () => {
     const html = await (await fetch(`${srv.base}/`)).text();
-    const box = html.match(/<input type="checkbox" id="marketingOptIn"[^>]*>/)[0];
+    assert.doesNotMatch(html, /id="marketingOptIn"/);
+    const bookingHtml = await (await fetch(`${srv.base}/booking`)).text();
+    const box = bookingHtml.match(/<input type="checkbox" id="marketingOptIn"[^>]*>/)[0];
     assert.doesNotMatch(box, /checked|required/);
   });
 

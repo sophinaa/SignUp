@@ -81,7 +81,7 @@ function init() {
     for (const name of TEXT_FIELDS) data[name] = form.elements[name]?.value ?? '';
     // Radios (a RadioNodeList) or, after the food deadline, a hidden input.
     data.bringing = form.elements.bringing?.value ?? '';
-    data.marketingOptIn = $('marketingOptIn').checked;
+    data.marketingOptIn = $('marketingOptIn')?.checked ?? false;
     return data;
   }
 
@@ -91,7 +91,7 @@ function init() {
     }
     const radio = form.querySelector(`input[name="bringing"][value="${rsvp.bringing}"]`);
     if (radio) radio.checked = true;
-    $('marketingOptIn').checked = Boolean(rsvp.marketingOptIn);
+    if ($('marketingOptIn')) $('marketingOptIn').checked = Boolean(rsvp.marketingOptIn);
     updateFood();
   }
 
