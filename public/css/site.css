@@ -1014,6 +1014,8 @@ textarea:focus-visible {
   margin-bottom: 0.25rem;
 }
 .table-wrap {
+  /* Positioned so screen-reader-only labels inside stay within the scroll area. */
+  position: relative;
   overflow-x: auto;
   background: var(--paper);
   border: 1px solid var(--line);
@@ -1626,5 +1628,293 @@ body.ph-scroll-on .simple-rsvp.rsvp-section {
   .ph-btn {
     min-height: 38px;
     font-size: 14px;
+  }
+}
+
+/* Organiser pages: matched to the home page ------------------------------- */
+/* Inter type, script headings with mustard rays, and the café menu card
+   (a fine double rule) for cards and tables. */
+
+.org-page {
+  --card-bg: var(--paper);
+  --frame-outside: var(--cream);
+  background: var(--cream);
+  color: var(--olive-900);
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+}
+.org-page h1,
+.org-page h2,
+.org-page h3 {
+  font-family: inherit;
+}
+
+.menu-card {
+  background: var(--card-bg);
+  border: 1.5px solid var(--olive-900);
+  border-radius: 18px;
+  box-shadow: inset 0 0 0 4px var(--card-bg), inset 0 0 0 5px var(--olive-900);
+}
+
+/* Top bar, like the hero nav: plain text, no box. */
+.org-bar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 4rem;
+}
+.org-brand {
+  color: var(--olive-900);
+  font-weight: 600;
+  text-decoration: none;
+}
+.org-brand:hover {
+  color: var(--olive-900);
+  text-decoration: underline;
+}
+.org-bar-tag {
+  color: var(--olive-700);
+  font-weight: 450;
+}
+.org-bar form {
+  margin: 0;
+}
+.org-link-btn {
+  min-height: 2.5rem;
+  padding: 0 1.1rem;
+  border: 1.5px solid var(--olive-900);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--olive-900);
+  font: 500 0.95rem / 1 inherit;
+  font-family: inherit;
+  cursor: pointer;
+}
+.org-link-btn:hover {
+  background: var(--olive-900);
+  color: var(--paper);
+}
+
+/* Script headings with rays, as on the RSVP letter. */
+.org-script {
+  position: relative;
+  width: fit-content;
+  margin: 0 0 0.9rem 3rem;
+  font: 400 clamp(2.6rem, 8vw, 3.4rem) / 1.05 'Great Vibes', 'Snell Roundhand', cursive !important;
+  letter-spacing: 0;
+  color: var(--olive-900);
+}
+.org-script .rays {
+  width: 1.9rem;
+  height: 1.4rem;
+  margin-top: -0.75rem;
+}
+/* Script capitals and tails overhang their box; give the rays room. */
+.org-script .rays-left {
+  margin-right: 0.7rem;
+}
+.org-script .rays-right {
+  margin-left: 0.55rem;
+}
+
+/* The cup straddles the card edge: card colour above, page colour below. */
+.org-card .frame-ornament {
+  background: linear-gradient(to bottom, var(--card-bg) 50%, var(--frame-outside) 50%);
+}
+
+/* Sign-in: a menu card with the croissant plate and cup, like the RSVP letter. */
+.org-login {
+  padding: 5.5rem var(--gutter) 4rem;
+}
+.org-card {
+  --card-bg: var(--sand);
+  position: relative;
+  max-width: 26rem;
+  margin: 0 auto;
+  padding: 4.75rem 1.75rem 3rem;
+  text-align: center;
+}
+.org-card .frame-plate {
+  width: min(13rem, 66%);
+}
+.org-card .org-script {
+  margin: 0 auto 0.4rem;
+}
+.org-sub {
+  margin-bottom: 1.5rem;
+  color: var(--olive-700);
+}
+.org-card .field {
+  text-align: left;
+}
+.org-card label {
+  font-weight: 500;
+}
+.org-page input[type='password'],
+.org-page input[type='search'] {
+  min-height: 3.1rem;
+  padding: 0.65rem 1.35rem;
+  border: 1.5px solid var(--control);
+  border-radius: 999px;
+  background: #fffdf7;
+}
+.org-submit {
+  width: 100%;
+  min-height: 3.3rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--olive-900);
+  color: var(--paper);
+  font: 600 1rem / 1 inherit;
+  font-family: inherit;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.org-submit:hover {
+  background: #2f3218;
+}
+.org-card .form-alert {
+  margin: 0 0 1.25rem;
+  text-align: left;
+}
+
+/* Dashboard */
+.org-page .organiser {
+  padding: 1.5rem 0 4rem;
+}
+.org-page .org-head {
+  align-items: flex-end;
+  margin-bottom: 1.25rem;
+}
+.org-eyebrow {
+  margin: 0 0 0.6rem;
+  color: var(--olive-700);
+  font-size: 0.95rem;
+}
+.org-title {
+  margin: 0;
+  font-size: clamp(2.6rem, 9vw, 5.6rem) !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.045em;
+  line-height: 0.85;
+  text-transform: uppercase;
+}
+.org-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.9rem;
+  padding: 0 1.5rem;
+  border-radius: 999px;
+  background: var(--terracotta);
+  color: var(--paper);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.org-btn:hover {
+  background: var(--terracotta-dark);
+  color: var(--paper);
+}
+.org-btn:focus-visible,
+.org-link-btn:focus-visible,
+.org-submit:focus-visible,
+.org-nav a:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.org-page .stats {
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  gap: 0.9rem;
+}
+.org-page .stat {
+  background: var(--card-bg);
+  border: 1.5px solid var(--olive-900);
+  border-radius: 14px;
+  box-shadow: inset 0 0 0 3px var(--card-bg), inset 0 0 0 4px var(--olive-900);
+  padding: 1rem 1.15rem;
+}
+.org-page .stat dt {
+  color: var(--olive-700);
+  font-size: 0.88rem;
+}
+.org-page .stat dd {
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 2.2rem;
+  letter-spacing: -0.04em;
+}
+
+.org-page .org-nav {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.25rem 0 0.5rem;
+}
+.org-page .org-nav a {
+  padding: 0.45rem 1rem;
+  border: 1.5px solid var(--olive-900);
+  border-radius: 999px;
+  color: var(--olive-900);
+  font-weight: 500;
+  font-size: 0.95rem;
+  text-decoration: none;
+}
+.org-page .org-nav a:hover {
+  background: var(--olive-900);
+  color: var(--paper);
+}
+
+.org-page .org-section {
+  padding-top: 2.25rem;
+}
+.org-page .org-section-head {
+  align-items: flex-end;
+}
+.org-page .search label {
+  font-weight: 500;
+}
+.org-page .table-wrap {
+  padding: 7px;
+  max-width: 100%;
+}
+.org-page table {
+  font-size: 0.93rem;
+}
+.org-page thead th {
+  background: var(--sand);
+  font-weight: 600;
+}
+.org-page thead th:first-child {
+  border-top-left-radius: 11px;
+}
+.org-page thead th:last-child {
+  border-top-right-radius: 11px;
+}
+.org-page tbody th {
+  font-weight: 600;
+}
+.org-page .badge {
+  border-radius: 999px;
+}
+.org-page .badge-yes {
+  background: var(--terracotta);
+  color: var(--paper);
+}
+.org-page .dietary-list li {
+  background: var(--card-bg);
+  border: 1.5px solid var(--olive-900);
+  border-radius: 14px;
+  box-shadow: inset 0 0 0 3px var(--card-bg), inset 0 0 0 4px var(--olive-900);
+  padding: 0.9rem 1.2rem;
+}
+
+@media (max-width: 40rem) {
+  .org-page .org-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .org-page .search {
+    width: 100%;
   }
 }

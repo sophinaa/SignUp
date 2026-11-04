@@ -346,45 +346,57 @@ ${footer(ev)}`;
   return layout({ title: `Your RSVP · ${ev.name}`, description: ev.summary, siteUrl, body, scripts: ['/js/rsvp.js'], noindex: true });
 }
 
+// ---- Organiser pages ------------------------------------------------------------
+// Styled like the home page: Inter type, script headings with mustard rays and
+// the café menu card (see .org-page in site.css).
+
+const scriptHeading = (tag, id, text, extra = '') =>
+  `<${tag} id="${id}" class="org-script">${RAYS.replace('class="rays"', 'class="rays rays-left"')}${RAYS.replace('class="rays"', 'class="rays rays-right"')}${text}${extra}</${tag}>`;
+
+function organiserBar({ signOut }) {
+  return `<header class="org-bar">
+  <div class="wrap wide org-bar-inner">
+    <a class="org-brand" href="/">Shared Light Café</a>
+    ${signOut ? '<form method="post" action="/organiser/logout"><button type="submit" class="org-link-btn">Sign out</button></form>' : '<span class="org-bar-tag">Organisers</span>'}
+  </div>
+</header>`;
+}
+
 export function loginPage({ error, configured }) {
-  const body = `${header({ showRsvp: false })}
-<main id="main" class="section">
-  <div class="wrap login-wrap">
-    <div class="card">
-      <h1 class="card-title">Organiser sign in</h1>
-      ${
-        configured
-          ? `${error ? `<div class="form-alert" role="alert"><p>${esc(error)}</p></div>` : ''}
-      <form method="post" action="/organiser/login" class="login-form">
-        <div class="field">
-          <label for="password">Password</label>
-          <input id="password" name="password" type="password" autocomplete="current-password" required autofocus>
-        </div>
-        <button type="submit" class="btn">Sign in</button>
-      </form>`
-          : '<p>Organiser access isn’t set up yet. Set the <code>ORGANISER_PASSWORD</code> environment variable on the server and restart it.</p>'
-      }
-    </div>
+  const body = `${organiserBar({ signOut: false })}
+<main id="main" class="org-login">
+  <div class="org-card menu-card">
+    <img class="frame-plate" src="/images/croissants.webp" alt="" width="520" height="330" decoding="async">
+    ${scriptHeading('h1', 'login-title', 'Organisers', '<span class="visually-hidden"> sign in</span>')}
+    ${
+      configured
+        ? `<p class="org-sub">Sign in to see who’s coming.</p>
+    ${error ? `<div class="form-alert" role="alert"><p>${esc(error)}</p></div>` : ''}
+    <form method="post" action="/organiser/login" class="login-form">
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required autofocus>
+      </div>
+      <button type="submit" class="org-submit">Sign in</button>
+    </form>`
+        : '<p class="org-sub">Organiser access isn’t set up yet. Set the <code>ORGANISER_PASSWORD</code> environment variable on the server and restart it.</p>'
+    }
+    ${CUP}
   </div>
 </main>`;
-  return layout({ title: 'Organiser sign in · Shared Light Café', description: 'Organiser access', body, noindex: true });
+  return layout({ title: 'Organiser sign in · Shared Light Café', description: 'Organiser access', body, bodyClass: 'org-page', noindex: true });
 }
 
 export function organiserPage(ev) {
-  const body = `<header class="site-header">
-  <div class="wrap wide header-inner">
-    <span class="brand">${LOGO}<span>Organiser view</span></span>
-    <form method="post" action="/organiser/logout"><button type="submit" class="btn btn-small btn-secondary">Sign out</button></form>
-  </div>
-</header>
+  const body = `${organiserBar({ signOut: true })}
 <main id="main" class="organiser">
   <div class="wrap wide">
     <div class="org-head">
       <div>
-        <h1>${esc(ev.name)}</h1>
-        <p class="small muted">${esc(ev.dateLabel)} · Time: ${esc(ev.timeLabel)} · Venue: ${esc(ev.venueLabel)}</p>
+        <p class="org-eyebrow">${esc(ev.dateLabel)} · Time: ${esc(ev.timeLabel)} · Venue: ${esc(ev.venueLabel)}</p>
+        <h1 class="org-title">Who’s coming</h1>
       </div>
-      <a class="btn btn-secondary" href="/organiser/export.csv" download>Download CSV</a>
+      <a class="org-btn" href="/organiser/export.csv" download>Download CSV</a>
     </div>
 
     <p id="org-status" class="org-status" role="status" aria-live="polite">Loading RSVPs…</p>
@@ -400,14 +412,14 @@ export function organiserPage(ev) {
 
     <section id="attendees" class="org-section" aria-labelledby="attendees-title">
       <div class="org-section-head">
-        <h2 id="attendees-title">Attendees</h2>
+        ${scriptHeading('h2', 'attendees-title', 'Attendees')}
         <div class="search">
           <label for="search">Search attendees</label>
           <input id="search" type="search" placeholder="Name, email, dish…" autocomplete="off">
         </div>
       </div>
       <p class="small muted" id="search-count" role="status" aria-live="polite"></p>
-      <div class="table-wrap" role="region" aria-labelledby="attendees-title" tabindex="0">
+      <div class="table-wrap menu-card" role="region" aria-labelledby="attendees-title" tabindex="0">
         <table>
           <thead><tr><th scope="col">Name</th><th scope="col">Email</th><th scope="col">Bringing</th><th scope="col">Dietary</th><th scope="col">Updates</th><th scope="col">RSVP’d</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
           <tbody id="attendee-rows"></tbody>
@@ -416,9 +428,9 @@ export function organiserPage(ev) {
     </section>
 
     <section id="food" class="org-section" aria-labelledby="food-title">
-      <h2 id="food-title">Food contributions</h2>
+      ${scriptHeading('h2', 'food-title', 'Food to share')}
       <p class="small muted">“Confirmed” is for organisers to tick once a contribution has been agreed. It resets if the guest changes their food details.</p>
-      <div class="table-wrap" role="region" aria-labelledby="food-title" tabindex="0">
+      <div class="table-wrap menu-card" role="region" aria-labelledby="food-title" tabindex="0">
         <table>
           <thead><tr><th scope="col">Guest</th><th scope="col">Response</th><th scope="col">Dish or item</th><th scope="col">Category</th><th scope="col">Servings</th><th scope="col">Ingredients / allergens</th><th scope="col">Notes</th><th scope="col">Confirmed</th></tr></thead>
           <tbody id="food-rows"></tbody>
@@ -427,10 +439,10 @@ export function organiserPage(ev) {
     </section>
 
     <section id="dietary" class="org-section" aria-labelledby="dietary-title">
-      <h2 id="dietary-title">Dietary requirements and allergies</h2>
+      ${scriptHeading('h2', 'dietary-title', 'Dietary needs')}
       <ul class="dietary-list" id="dietary-rows"></ul>
     </section>
   </div>
 </main>`;
-  return layout({ title: 'Organiser view · Shared Light Café', description: 'Organiser view', body, scripts: ['/js/organiser.js'], bodyClass: 'organiser-body', noindex: true });
+  return layout({ title: 'Organiser view · Shared Light Café', description: 'Organiser view', body, scripts: ['/js/organiser.js'], bodyClass: 'org-page', noindex: true });
 }
