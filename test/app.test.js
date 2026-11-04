@@ -4,6 +4,10 @@ import { openDatabase } from '../server/db.js';
 import { createApp } from '../server/app.js';
 import baseConfig from '../config/event.js';
 
+// Most tests use a copy with time and venue unset, to check the
+// "To be confirmed" display regardless of what config/event.js says now.
+const unconfirmed = { ...baseConfig, startTime: null, endTime: null, venue: { name: null, address: null, mapUrl: null }, entry: null };
+
 const PASSWORD = 'organiser-test-password';
 const SECRET = 'x'.repeat(40);
 
@@ -11,7 +15,7 @@ async function startServer(overrides = {}) {
   const db = overrides.db ?? (await openDatabase(':memory:'));
   const app = createApp({
     db,
-    config: overrides.config ?? baseConfig,
+    config: overrides.config ?? unconfirmed,
     appSecret: SECRET,
     organiserPassword: PASSWORD,
     minSubmitMs: 0,
@@ -108,7 +112,7 @@ describe('public page', () => {
 
 describe('calendar once the time is confirmed', () => {
   let srv;
-  before(async () => (srv = await startServer({ config: { ...baseConfig, startTime: '14:00', endTime: '17:00' } })));
+  before(async () => (srv = await startServer({ config: { ...unconfirmed, startTime: '14:00', endTime: '17:00' } })));
   after(() => srv.close());
 
   test('page shows time and Add to calendar; .ics has UTC times', async () => {
@@ -119,6 +123,22 @@ describe('calendar once the time is confirmed', () => {
     assert.match(ics, /DTSTART:20261122T140000Z/);
     assert.match(ics, /DTEND:20261122T170000Z/);
     assert.doesNotMatch(ics, /LOCATION/);
+  });
+});
+
+describe('current event details (config/event.js)', () => {
+  let srv;
+  before(async () => (srv = await startServer({ config: baseConfig })));
+  after(() => srv.close());
+
+  test('shows 11am at The Faith Project, with a calendar download', async () => {
+    const html = await (await fetch(`${srv.base}/`)).text();
+    assert.match(html, /11am · The Faith Project/);
+    assert.doesNotMatch(html, /Time &amp; venue to be confirmed/);
+    assert.match(html, /Add to calendar/);
+    const ics = await (await fetch(`${srv.base}/event.ics`)).text();
+    assert.match(ics, /DTSTART:20261122T110000Z/);
+    assert.match(ics, /LOCATION:The Faith Project/);
   });
 });
 

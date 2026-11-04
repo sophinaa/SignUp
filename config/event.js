@@ -22,7 +22,7 @@ export default {
   // Once `startTime` is set, the time is shown and an "Add to calendar"
   // download appears. `endTime` is optional (the calendar entry defaults to
   // three hours if it is left out).
-  startTime: null,
+  startTime: '11:00',
   endTime: null,
 
   // Time zone the times above are in.
@@ -30,11 +30,11 @@ export default {
 
   venue: {
     // e.g. 'The Community Hall'
-    name: null,
+    name: 'The Faith Project',
     // e.g. '12 Example Street, London AB1 2CD'
     address: null,
     // Optional link to a map, e.g. a Google Maps URL.
-    mapUrl: null,
+    mapUrl: 'https://www.google.com/maps/search/?api=1&query=The+Faith+Project',
   },
 
   // Entry details shown to guests, e.g. '£2 on the door'.
