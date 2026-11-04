@@ -4,7 +4,7 @@ export const esc = (value) =>
   String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
 // Bump when CSS/JS change so phones don't keep a stale cached copy.
-const ASSET_VERSION = '6';
+const ASSET_VERSION = '7';
 
 // ---- Illustrations (decorative, hidden from screen readers) ---------------------
 
@@ -17,15 +17,14 @@ const ICONS = {
 const LOGO = `<svg class="logo" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><circle cx="16" cy="10" r="5" fill="var(--terracotta-soft)" stroke="var(--terracotta)" stroke-width="1.6"/><path d="M6 17h18v3a9 9 0 0 1-9 9h0a9 9 0 0 1-9-9z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M24 19h1.5a3 3 0 0 1 0 6H23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
 
 // Hand-drawn sprigs and sparkles framing the RSVP card.
-const SPARKLE = `<svg class="sparkle" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 1v22M1 12h22M4.2 4.2l15.6 15.6M19.8 4.2 4.2 19.8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`;
+// Mustard rays either side of the heading, as on the poster's "≡ CAFÉ ≡".
+const RAYS = `<svg class="rays" viewBox="0 0 40 30" aria-hidden="true" focusable="false"><path d="M6 6l28 6M3 15h31M6 24l28-6" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg>`;
 
-const SPRIG = `<path d="M4 20c14-1 26-6 36-14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M13 18c-1-4 1-7 4-8-1 4-1 6-4 8zM22 15c0-4 2-6 5-7-1 4-2 5-5 7zM31 11c0-3 2-5 5-6-1 3-2 5-5 6zM15 18c3 2 6 2 8 0-3-1-5-1-8 0zM25 14c3 1 5 1 7-1-3-1-5-1-7 1z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>`;
+// A coffee cup on a terracotta saucer, sitting on the bottom edge.
+const CUP = `<svg class="frame-ornament frame-bottom" viewBox="0 0 64 40" aria-hidden="true" focusable="false"><path d="M26 4c-2 2.5 2 4.5 0 7M33 2c-2 2.5 2 4.5 0 7" fill="none" stroke="var(--mustard)" stroke-width="2" stroke-linecap="round"/><ellipse cx="31" cy="33" rx="21" ry="4.5" fill="var(--terracotta)" stroke="var(--olive-900)" stroke-width="1.5"/><path d="M17 14h28v5a14 14 0 0 1-14 14h0a14 14 0 0 1-14-14z" fill="var(--paper)" stroke="var(--olive-900)" stroke-width="1.6" stroke-linejoin="round"/><path d="M19 17.5h24" stroke="#8a5a34" stroke-width="2.4" stroke-linecap="round"/><path d="M45 17h3a4.5 4.5 0 0 1 0 9h-4" fill="none" stroke="var(--olive-900)" stroke-width="1.6" stroke-linecap="round"/></svg>`;
 
-const VINE = `<svg class="frame-vine" viewBox="0 0 24 120" aria-hidden="true" focusable="false"><path d="M12 4c-4 20 4 36 0 56s4 36 0 56" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><g fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"><path d="M11 22c-6-1-8-5-8-9 5 1 8 4 8 9zM13 40c6-1 8-5 8-9-5 1-8 4-8 9zM11 62c-6-1-8-5-8-9 5 1 8 4 8 9zM13 82c6-1 8-5 8-9-5 1-8 4-8 9zM11 102c-6-1-8-5-8-9 5 1 8 4 8 9z"/></g><circle cx="5" cy="70" r="1.8" fill="currentColor"/></svg>`;
-
-const FRAME_ORNAMENTS = `<svg class="frame-ornament frame-top" viewBox="0 0 120 28" aria-hidden="true" focusable="false"><g transform="translate(60 0) scale(-1 1)">${SPRIG}</g><g transform="translate(60 0)">${SPRIG}</g><circle cx="60" cy="21" r="3" fill="var(--terracotta-soft)" stroke="var(--terracotta)" stroke-width="1.4"/></svg>
-<svg class="frame-ornament frame-bottom" viewBox="0 0 120 28" aria-hidden="true" focusable="false"><g transform="translate(60 28) scale(-1 -1)">${SPRIG}</g><g transform="translate(60 28) scale(1 -1)">${SPRIG}</g><circle cx="60" cy="14" r="6" fill="var(--terracotta-soft)" stroke="var(--terracotta)" stroke-width="1.6"/><path d="M60 3v3M60 22v3M49 14h3M68 14h3" stroke="var(--terracotta)" stroke-width="1.4" stroke-linecap="round"/></svg>
-${VINE.replace('class="frame-vine"', 'class="frame-vine frame-vine-left"')}${VINE.replace('class="frame-vine"', 'class="frame-vine frame-vine-right"')}`;
+const FRAME_ORNAMENTS = `<img class="frame-plate" src="/images/croissants.webp" alt="" width="520" height="330" decoding="async">
+${CUP}`;
 
 // ---- Pill hero ------------------------------------------------------------------
 // "CA · pill · FÉ": scrolling opens the hairline between the halves into a
@@ -137,7 +136,7 @@ function rsvpForm(ev, { mode, formToken }) {
   const bringing = foodOpen
     ? `<fieldset class="field choice-group" data-field="bringing" aria-describedby="bringing-hint bringing-error">
   <legend>Bringing food?</legend>
-  <p class="hint" id="bringing-hint">Optional — you’re welcome either way.</p>
+  <p class="hint" id="bringing-hint">Optional. You’re welcome either way.</p>
   <p class="field-error" id="bringing-error" hidden></p>
   <div class="choices">
     <label class="choice"><input type="radio" id="bringing-yes" name="bringing" value="yes" aria-controls="food-details"> <span>Yes</span></label>
@@ -146,7 +145,7 @@ function rsvpForm(ev, { mode, formToken }) {
   </div>
 </fieldset>`
     : `<div class="note">
-  <p><strong>Food contributions closed on ${esc(ev.foodDeadlineLabel)}.</strong> You’re still very welcome to come along — there’s no need to bring anything.</p>
+  <p><strong>Food contributions closed on ${esc(ev.foodDeadlineLabel)}.</strong> You’re still very welcome to come along, and there’s no need to bring anything.</p>
   <input type="hidden" name="bringing" value="no">
 </div>`;
 
@@ -250,7 +249,7 @@ function confirmationPanel(ev) {
     ${ICONS.cup}
     <h3 id="success-title">You’re on the list</h3>
   </div>
-  <p id="success-message">Thank you — your RSVP has been saved. We’re looking forward to seeing you.</p>
+  <p id="success-message">Thank you, your RSVP has been saved. We’re looking forward to seeing you.</p>
   ${detailsList(ev, { compact: true })}
   <div id="success-food" class="success-food"></div>
   ${ev.calendarAvailable ? '<p><a class="btn btn-secondary" href="/event.ics" download="shared-light-cafe.ics">Add to calendar</a></p>' : ''}
@@ -294,7 +293,7 @@ export function homePage(ev, { formToken, siteUrl, ogImage }) {
     <div class="wrap narrow">
       <div class="rsvp-frame">
       ${FRAME_ORNAMENTS}
-      <h2 id="rsvp-title" class="rsvp-script">${SPARKLE.replace('class="sparkle"', 'class="sparkle sparkle-top"')}${SPARKLE.replace('class="sparkle"', 'class="sparkle sparkle-left"')}<span aria-hidden="true">Rsvp</span><span class="visually-hidden">RSVP</span></h2>
+      <h2 id="rsvp-title" class="rsvp-script">${RAYS.replace('class="rays"', 'class="rays rays-left"')}${RAYS.replace('class="rays"', 'class="rays rays-right"')}<span aria-hidden="true">Rsvp</span><span class="visually-hidden">RSVP</span></h2>
       <div class="event-summary" id="rsvp-intro">
         <p>${esc(ev.name)} · ${esc(ev.dateLabel)}<br>${location}</p>
         ${ev.venueAddress ? `<p>${esc(ev.venueAddress)}</p>` : ''}

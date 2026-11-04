@@ -68,7 +68,7 @@ export function eventView(config, now = new Date()) {
   const timeLabel = hasTime
     ? blank(config.endTime)
       ? formatTime(config.startTime)
-      : `${formatTime(config.startTime)} – ${formatTime(config.endTime)}`
+      : `${formatTime(config.startTime)} to ${formatTime(config.endTime)}`
     : null;
 
   const venueName = blank(config.venue?.name) ? null : config.venue.name.trim();

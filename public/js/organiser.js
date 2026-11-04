@@ -84,7 +84,7 @@ function renderAttendees() {
     del.addEventListener('click', () => removeRsvp(r));
     const actions = el('td');
     actions.append(del);
-    tr.append(name, el('td', r.email), el('td', bringing), el('td', r.dietary || '—', 'prewrap'), el('td', r.marketingOptIn ? 'Yes' : 'No'), el('td', formatDate(r.createdAt)), actions);
+    tr.append(name, el('td', r.email), el('td', bringing), el('td', r.dietary || 'None', 'prewrap'), el('td', r.marketingOptIn ? 'Yes' : 'No'), el('td', formatDate(r.createdAt)), actions);
     body.append(tr);
   }
   $('search-count').textContent = q ? `Showing ${shown.length} of ${rsvps.length} attendees.` : '';
@@ -119,11 +119,11 @@ function renderFood() {
     tr.append(
       name,
       response,
-      el('td', r.dish || '—'),
-      el('td', CATEGORIES[r.category] || '—'),
-      el('td', r.servings ? String(r.servings) : '—'),
-      el('td', r.ingredients || '—', 'prewrap'),
-      el('td', r.foodNotes || '—', 'prewrap'),
+      el('td', r.dish || 'Not decided'),
+      el('td', CATEGORIES[r.category] || 'Not given'),
+      el('td', r.servings ? String(r.servings) : 'Not given'),
+      el('td', r.ingredients || 'Not given', 'prewrap'),
+      el('td', r.foodNotes || 'None', 'prewrap'),
       confirmCell,
     );
     body.append(tr);

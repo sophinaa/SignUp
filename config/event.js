@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// Shared Light Café — event details
+// Shared Light Café: event details
 //
 // This is the one file to edit when event details change. Restart the server
 // after saving (on most hosts, a redeploy does this for you).

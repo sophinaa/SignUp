@@ -113,7 +113,7 @@ describe('calendar once the time is confirmed', () => {
 
   test('page shows time and Add to calendar; .ics has UTC times', async () => {
     const html = await (await fetch(`${srv.base}/`)).text();
-    assert.match(html, /2pm – 5pm/);
+    assert.match(html, /2pm to 5pm/);
     assert.match(html, /Add to calendar/);
     const ics = await (await fetch(`${srv.base}/event.ics`)).text();
     assert.match(ics, /DTSTART:20261122T140000Z/);

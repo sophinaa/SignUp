@@ -1121,53 +1121,47 @@ td input[type='checkbox'] {
 .simple-rsvp {
   --frame-outside: var(--cream);
 }
+/* A café menu card: a fine double rule, with a plate of croissants resting
+   on the top edge and a coffee cup on the bottom edge. */
 .rsvp-frame {
   position: relative;
-  margin: 1.25rem 0.5rem;
-  padding: 2.75rem 1.5rem 3rem;
+  margin: 5rem 0.5rem 1.75rem;
+  padding: 5rem 1.5rem 3.25rem;
   background: transparent;
   border: 1.5px solid var(--olive-900);
-  border-radius: 28px;
+  border-radius: 22px;
+  box-shadow: inset 0 0 0 5px var(--frame-outside), inset 0 0 0 6px var(--olive-900);
   color: var(--olive-900);
 }
 @media (min-width: 40rem) {
   .rsvp-frame {
-    padding: 3.25rem 3rem 3.5rem;
+    padding: 5.5rem 3rem 3.75rem;
   }
 }
 
-/* Ornaments sit on the border, with a paper "gap" behind them. */
+.frame-plate {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: min(15rem, 62%);
+  height: auto;
+  transform: translate(-50%, -52%);
+  filter: drop-shadow(0 6px 10px rgb(65 69 34 / 0.18));
+  pointer-events: none;
+}
+
+/* The cup sits on the border, with the page colour behind it. */
 .frame-ornament {
   position: absolute;
   left: 50%;
-  width: 7.5rem;
-  height: 1.75rem;
+  width: 4.5rem;
+  height: 2.8rem;
+  padding: 0 0.5rem;
   transform: translateX(-50%);
-  padding: 0 0.4rem;
   background: var(--frame-outside);
-  color: var(--olive-900);
-}
-.frame-top {
-  top: -0.95rem;
 }
 .frame-bottom {
-  bottom: -0.95rem;
-}
-.frame-vine {
-  position: absolute;
-  top: 38%;
-  width: 1.5rem;
-  height: 7.5rem;
-  padding: 0.3rem 0;
-  background: var(--frame-outside);
-  color: var(--olive-900);
-}
-.frame-vine-left {
-  left: -0.8rem;
-}
-.frame-vine-right {
-  right: -0.8rem;
-  transform: scaleX(-1);
+  bottom: -1.45rem;
 }
 
 .simple-rsvp .rsvp-frame .rsvp-script {
@@ -1191,21 +1185,22 @@ td input[type='checkbox'] {
   border-radius: 2px;
   transform: rotate(-2deg);
 }
-.sparkle {
+.rays {
   position: absolute;
-  color: var(--olive-900);
+  top: 50%;
+  width: 2.2rem;
+  height: 1.65rem;
+  margin-top: -0.95rem;
+  color: var(--mustard);
 }
-.sparkle-top {
-  width: 1.4rem;
-  height: 1.4rem;
-  top: -1.4rem;
-  right: 18%;
+.rays-left {
+  right: 100%;
+  margin-right: 0.35rem;
 }
-.sparkle-left {
-  width: 1rem;
-  height: 1rem;
-  top: 45%;
-  left: -1.6rem;
+.rays-right {
+  left: 100%;
+  margin-left: 0.1rem;
+  transform: scaleX(-1);
 }
 
 .simple-rsvp .event-summary {
@@ -1347,8 +1342,7 @@ td input[type='checkbox'] {
 }
 
 @media (max-width: 22rem) {
-  .frame-vine,
-  .sparkle-left {
+  .rays {
     display: none;
   }
 }
