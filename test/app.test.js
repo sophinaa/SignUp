@@ -71,7 +71,8 @@ describe('public page', () => {
 
   test('shows confirmed and unconfirmed details without inventing any', async () => {
     const html = await (await fetch(`${srv.base}/`)).text();
-    assert.match(html, /Good food\. Warm conversation\. Community\./);
+    assert.match(html, /Where dreams rise through the silence\./);
+    assert.match(html, /\/hero\/hero\.js/);
     assert.match(html, /Sunday 22 November 2026/);
     assert.match(html, /<dt>Time<\/dt><dd><span class="tbc">To be confirmed<\/span>/);
     assert.match(html, /<dt>Venue<\/dt><dd><span class="tbc">To be confirmed<\/span>/);

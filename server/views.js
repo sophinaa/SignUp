@@ -4,7 +4,7 @@ export const esc = (value) =>
   String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
 // Bump when CSS/JS change so phones don't keep a stale cached copy.
-const ASSET_VERSION = '4';
+const ASSET_VERSION = '5';
 
 // ---- Illustrations (decorative, hidden from screen readers) ---------------------
 
@@ -18,7 +18,7 @@ const LOGO = `<svg class="logo" viewBox="0 0 32 32" aria-hidden="true" focusable
 
 // ---- Shared page shell ----------------------------------------------------------
 
-function layout({ title, description, siteUrl, ogImage, body, scripts = [], bodyClass = '', noindex = false }) {
+function layout({ title, description, siteUrl, ogImage, body, scripts = [], bodyClass = '', noindex = false, cinematic = false }) {
   const url = siteUrl ? esc(siteUrl) : null;
   return `<!doctype html>
 <html lang="en-GB">
@@ -33,13 +33,17 @@ ${noindex ? '<meta name="robots" content="noindex, nofollow">' : ''}
 <meta property="og:description" content="${esc(description)}">
 ${url ? `<meta property="og:url" content="${url}">` : ''}
 ${url && ogImage ? `<meta property="og:image" content="${url}${esc(ogImage)}">\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n<meta name="twitter:card" content="summary_large_image">` : ''}
-<meta name="theme-color" content="#fbefd5">
-<meta name="color-scheme" content="light">
+<meta name="theme-color" content="${cinematic ? '#002b42' : '#fbefd5'}">
+<meta name="color-scheme" content="${cinematic ? 'dark' : 'light'}">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/fonts/bodoni-moda-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/fraunces-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/source-sans-3-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/css/site.css?v=${ASSET_VERSION}">
+${cinematic ? `<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/hero/hero.css?v=${ASSET_VERSION}">` : ''}
 ${scripts.map((s) => `<script type="module" src="${s}?v=${ASSET_VERSION}"></script>`).join('\n')}
 </head>
 <body class="${bodyClass}">
@@ -241,29 +245,19 @@ export function homePage(ev, { formToken, siteUrl, ogImage }) {
   const deadline = ev.foodDeadlineLabel.replace(/^\w+ /, '').replace(/ \d{4}$/, '');
   const body = `<a class="skip-link" href="#rsvp">Skip to the RSVP form</a>
 <main id="main">
-  <section class="gathering" aria-labelledby="hero-title">
-    <h1 id="hero-title" class="visually-hidden">${esc(ev.name)}</h1>
-    <p class="visually-hidden">Good food. Warm conversation. Community.</p>
-    <div class="gathering-art" aria-hidden="true">
-      <img src="/images/shared-light-gathering.png" width="1122" height="1402" alt="" fetchpriority="high">
-    </div>
-    <div class="gathering-info">
-      <p class="gathering-date">${esc(ev.dateLabel)}</p>
-      <p class="gathering-location">${location}</p>
-      ${ev.venueAddress ? `<p class="small">${esc(ev.venueAddress)}</p>` : ''}
-      ${ev.mapUrl ? `<p><a href="${esc(ev.mapUrl)}" target="_blank" rel="noopener noreferrer">View map</a></p>` : ''}
-      ${ev.entryConfirmed ? `<p class="small">${esc(ev.entryLabel)}</p>` : ''}
-      <p class="gathering-welcome">A welcoming space for reverts, those exploring Islam, and friends.</p>
-      <p class="gathering-deadline">${ev.foodOpen ? `Bringing food? Let us know by <span class="gathering-deadline-date">${esc(deadline)}</span>.` : 'Food contributions are now closed.'}</p>
-      <p class="gathering-note">Everyone welcome · Bringing food is optional</p>
-      <a class="btn btn-large gathering-cta" href="#rsvp">RSVP</a>
-      ${ev.calendarAvailable ? '<a class="calendar-link small" href="/event.ics" download="shared-light-cafe.ics">Add to calendar</a>' : ''}
-    </div>
-  </section>
+  <div id="cinematic-hero"></div>
+  <noscript><section class="wrap section"><h1>Where dreams rise through the silence.</h1><a class="btn" href="#rsvp">RSVP</a></section></noscript>
   <section class="section rsvp-section simple-rsvp" id="rsvp" aria-labelledby="rsvp-title" tabindex="-1">
     <div class="wrap narrow">
       <h2 id="rsvp-title">RSVP</h2>
-      <p id="rsvp-intro" class="visually-hidden">Let us know you’re coming.</p>
+      <div class="event-summary" id="rsvp-intro">
+        <p>${esc(ev.name)} · ${esc(ev.dateLabel)}<br>${location}</p>
+        ${ev.venueAddress ? `<p>${esc(ev.venueAddress)}</p>` : ''}
+        ${ev.mapUrl ? `<p><a href="${esc(ev.mapUrl)}" target="_blank" rel="noopener noreferrer">View map</a></p>` : ''}
+        ${ev.entryConfirmed ? `<p>${esc(ev.entryLabel)}</p>` : ''}
+        <p class="small">Everyone welcome. Bringing food is optional.${ev.foodOpen ? ` Please let us know by ${esc(deadline)}.` : ''}</p>
+        ${ev.calendarAvailable ? '<a href="/event.ics" download="shared-light-cafe.ics">Add to calendar</a>' : ''}
+      </div>
       ${rsvpForm(ev, { mode: 'create', formToken })}
       ${confirmationPanel(ev)}
     </div>
@@ -275,8 +269,9 @@ export function homePage(ev, { formToken, siteUrl, ogImage }) {
     siteUrl,
     ogImage,
     body,
-    bodyClass: 'gathering-page',
-    scripts: ['/js/rsvp.js'],
+    bodyClass: 'cinematic-page',
+    cinematic: true,
+    scripts: ['/hero/hero.js', '/js/rsvp.js'],
   });
 }
 

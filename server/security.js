@@ -131,8 +131,12 @@ export function securityHeaders({ production }) {
     "frame-ancestors 'none'",
   ].join('; ');
   return (req, res, next) => {
+    // The cinematic home page uses the requested Google Fonts and video host.
+    const pageCsp = req.path === '/' ? csp
+      .replace("style-src 'self'", "style-src 'self' https://fonts.googleapis.com; style-src-attr 'unsafe-inline'")
+      .replace("font-src 'self'", "font-src 'self' https://fonts.gstatic.com; media-src https://d8j0ntlcm91z4.cloudfront.net") : csp;
     res.set({
-      'Content-Security-Policy': csp,
+      'Content-Security-Policy': pageCsp,
       'X-Content-Type-Options': 'nosniff',
       'X-Frame-Options': 'DENY',
       'Referrer-Policy': 'same-origin',

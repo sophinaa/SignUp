@@ -2,14 +2,15 @@
 
 A single-page RSVP site for Shared Light Café (Sunday 22 November 2026), with a password-protected organiser view.
 
-- **Stack:** Node.js 22 (≥ 22.13), Express, SQLite via Node's built-in `node:sqlite`. No build step and no native modules.
+- **Stack:** React + TypeScript hero, Vite, Tailwind CSS and a shadcn/ui Button; Node.js 22 (≥ 22.13), Express and SQLite via Node's built-in `node:sqlite`.
 - **Data:** RSVPs are saved in one SQLite file, `rsvps.sqlite`, inside `DATA_DIR`.
-- **No third-party requests:** fonts are self-hosted and there's no analytics.
+- **Media:** the cinematic hero uses Google Fonts (Instrument Serif and Inter) and the supplied CloudFront video. There is no analytics.
 
 ## Run it locally
 
 ```bash
 npm install
+npm run build            # compile the React hero into public/hero
 cp .env.example .env     # then fill in APP_SECRET and ORGANISER_PASSWORD
 npm run dev              # http://localhost:3000, restarts when files change
 npm test                 # automated checks
@@ -65,9 +66,9 @@ The app is a single long-running Node process that needs a **persistent disk** f
 
 Good fits:
 
-- **Render:** create a Web Service with build command `npm ci` and start command `npm start`. Add a Disk mounted at `/data` and set `DATA_DIR=/data`.
+- **Render:** create a Web Service with build command `npm ci && npm run build` and start command `npm start`. Add a Disk mounted at `/data` and set `DATA_DIR=/data`.
 - **Fly.io or Railway:** use the included `Dockerfile` and attach a volume at `/data`.
-- **Any VPS:** run `npm ci --omit=dev && npm start` behind Caddy or nginx with HTTPS, and keep it running with systemd or pm2.
+- **Any VPS:** run `npm ci && npm run build && npm prune --omit=dev && npm start` behind Caddy or nginx with HTTPS, and keep it running with systemd or pm2.
 
 For any host, set `NODE_ENV=production`, `APP_SECRET`, `ORGANISER_PASSWORD`, `SITE_URL`, `DATA_DIR` and `TRUST_PROXY=1`. Always serve the site over HTTPS. `/healthz` returns `{"ok":true}` for uptime checks.
 
@@ -88,3 +89,11 @@ server/event.js, ics.js, csv.js
 public/                  CSS, browser JS, favicon, link-preview image
 test/app.test.js         automated tests (npm test)
 ```
+
+## Cinematic hero
+
+The home-page hero lives in `frontend/src/components/cinematic-hero.tsx`. Both RSVP links point to the existing `#rsvp` form; the booking API and organiser workflow remain server-side. The hero uses the supplied Velorah branding and copy.
+
+Run `npm run build` after editing the React code, or run `npm run dev:hero` in a second terminal for rebuilds while the Express server is running. The build also type-checks TypeScript. The Docker image builds the frontend before removing development dependencies.
+
+The supplied video plays muted and loops. A small playback control lets visitors pause it; reduced-motion preferences disable the entrance animation and pause the video. The navy background remains when the video cannot load.
