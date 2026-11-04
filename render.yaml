@@ -1,0 +1,37 @@
+# Render Blueprint: https://render.com/docs/blueprint-spec
+# In Render: New → Blueprint → pick this repo. You'll be asked for the values
+# marked `sync: false`.
+services:
+  - type: web
+    name: shared-light-cafe
+    runtime: node
+    # A persistent disk (where RSVPs are saved) needs a paid instance.
+    plan: starter
+    # --include=dev: the build step needs Vite/TypeScript even though
+    # NODE_ENV is production.
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /healthz
+    disk:
+      name: rsvp-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - key: DATA_DIR
+        value: /data
+      - key: TRUST_PROXY
+        value: "1"
+      # Random secret, generated once by Render. Don't change it later:
+      # guests' manage links depend on it.
+      - key: APP_SECRET
+        generateValue: true
+      # Your organiser password (12+ characters).
+      - key: ORGANISER_PASSWORD
+        sync: false
+      # The site's address, e.g. https://shared-light-cafe.onrender.com
+      - key: SITE_URL
+        sync: false
