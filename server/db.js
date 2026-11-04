@@ -1,4 +1,4 @@
-import { DatabaseSync } from 'node:sqlite';
+import { createClient } from '@libsql/client';
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -49,32 +49,19 @@ function toRecord(row) {
   };
 }
 
-const isUniqueEmailError = (err) => /UNIQUE constraint failed: rsvps\.email/.test(err?.message || '');
+const uniqueFailure = (err) => /UNIQUE constraint failed: rsvps\.(\w+)/.exec(err?.message || '')?.[1] ?? null;
 
-export function openDatabase(file) {
-  if (file !== ':memory:') mkdirSync(dirname(file), { recursive: true });
-  const db = new DatabaseSync(file);
-  db.exec('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;');
-  db.exec(SCHEMA);
+// Opens the RSVP database. `url` is a local file ("file:data/rsvps.sqlite"),
+// ":memory:" for tests, or a hosted libSQL/Turso database ("libsql://…",
+// with `authToken`). All methods are async.
+export async function openDatabase(url, { authToken } = {}) {
+  if (url.startsWith('file:')) mkdirSync(dirname(url.slice('file:'.length)), { recursive: true });
+  const client = createClient({ url, authToken });
+  if (url.startsWith('file:')) await client.execute('PRAGMA journal_mode = WAL');
+  await client.execute(SCHEMA);
 
-  const q = {
-    insert: db.prepare(`
-      INSERT INTO rsvps (public_id, submission_id, full_name, email, dietary, bringing, dish, category,
-                         servings, ingredients, food_notes, marketing_opt_in, created_at, updated_at)
-      VALUES (:publicId, :submissionId, :fullName, :email, :dietary, :bringing, :dish, :category,
-              :servings, :ingredients, :foodNotes, :marketingOptIn, :now, :now)`),
-    update: db.prepare(`
-      UPDATE rsvps SET full_name = :fullName, email = :email, dietary = :dietary, bringing = :bringing,
-             dish = :dish, category = :category, servings = :servings, ingredients = :ingredients,
-             food_notes = :foodNotes, marketing_opt_in = :marketingOptIn, food_confirmed = :foodConfirmed,
-             updated_at = :now
-       WHERE public_id = :publicId`),
-    byPublicId: db.prepare('SELECT * FROM rsvps WHERE public_id = ?'),
-    bySubmissionId: db.prepare('SELECT * FROM rsvps WHERE submission_id = ?'),
-    all: db.prepare('SELECT * FROM rsvps ORDER BY created_at ASC, id ASC'),
-    setFoodConfirmed: db.prepare('UPDATE rsvps SET food_confirmed = ?, updated_at = ? WHERE public_id = ?'),
-    delete: db.prepare('DELETE FROM rsvps WHERE public_id = ?'),
-  };
+  const one = async (sql, args) => toRecord((await client.execute({ sql, args })).rows[0]);
+  const byPublicId = (publicId) => one('SELECT * FROM rsvps WHERE public_id = ?', [publicId]);
 
   const params = (v) => ({
     fullName: v.fullName,
@@ -91,49 +78,70 @@ export function openDatabase(file) {
   });
 
   return {
-    raw: db,
+    findBySubmissionId: (submissionId) => one('SELECT * FROM rsvps WHERE submission_id = ?', [submissionId]),
+    findById: byPublicId,
+    list: async () => (await client.execute('SELECT * FROM rsvps ORDER BY created_at ASC, id ASC')).rows.map(toRecord),
 
-    findBySubmissionId: (submissionId) => toRecord(q.bySubmissionId.get(submissionId)),
-    findById: (publicId) => toRecord(q.byPublicId.get(publicId)),
-    list: () => q.all.all().map(toRecord),
-
-    create(value, submissionId) {
+    // Resolves to { rsvp, replayed }. If the same submission arrives twice at
+    // once, the second gets the booking the first created.
+    async create(value, submissionId) {
       const publicId = randomUUID();
       try {
-        q.insert.run({ ...params(value), publicId, submissionId: submissionId || null });
+        await client.execute({
+          sql: `INSERT INTO rsvps (public_id, submission_id, full_name, email, dietary, bringing, dish, category,
+                                   servings, ingredients, food_notes, marketing_opt_in, created_at, updated_at)
+                VALUES (:publicId, :submissionId, :fullName, :email, :dietary, :bringing, :dish, :category,
+                        :servings, :ingredients, :foodNotes, :marketingOptIn, :now, :now)`,
+          args: { ...params(value), publicId, submissionId: submissionId || null },
+        });
       } catch (err) {
-        if (isUniqueEmailError(err)) throw new DuplicateEmailError();
+        const column = uniqueFailure(err);
+        if (column === 'submission_id' || (column === 'email' && submissionId)) {
+          const existing = submissionId && (await this.findBySubmissionId(submissionId));
+          if (existing) return { rsvp: existing, replayed: true };
+        }
+        if (column === 'email') throw new DuplicateEmailError();
         throw err;
       }
-      return toRecord(q.byPublicId.get(publicId));
+      return { rsvp: await byPublicId(publicId), replayed: false };
     },
 
     // Updates an RSVP from the guest's manage link. If the food details change,
     // any organiser confirmation is cleared so it can be re-checked.
-    updateFromGuest(publicId, value) {
-      const existing = toRecord(q.byPublicId.get(publicId));
+    async updateFromGuest(publicId, value) {
+      const existing = await byPublicId(publicId);
       if (!existing) return null;
       const foodChanged = FOOD_FIELDS.some((f) => (existing[f] ?? null) !== (value[f] ?? null));
       try {
-        q.update.run({
-          ...params(value),
-          publicId,
-          foodConfirmed: existing.foodConfirmed && !foodChanged && value.bringing !== 'no' ? 1 : 0,
+        await client.execute({
+          sql: `UPDATE rsvps SET full_name = :fullName, email = :email, dietary = :dietary, bringing = :bringing,
+                       dish = :dish, category = :category, servings = :servings, ingredients = :ingredients,
+                       food_notes = :foodNotes, marketing_opt_in = :marketingOptIn, food_confirmed = :foodConfirmed,
+                       updated_at = :now
+                 WHERE public_id = :publicId`,
+          args: {
+            ...params(value),
+            publicId,
+            foodConfirmed: existing.foodConfirmed && !foodChanged && value.bringing !== 'no' ? 1 : 0,
+          },
         });
       } catch (err) {
-        if (isUniqueEmailError(err)) throw new DuplicateEmailError();
+        if (uniqueFailure(err) === 'email') throw new DuplicateEmailError();
         throw err;
       }
-      return toRecord(q.byPublicId.get(publicId));
+      return byPublicId(publicId);
     },
 
-    setFoodConfirmed(publicId, confirmed) {
-      const result = q.setFoodConfirmed.run(confirmed ? 1 : 0, new Date().toISOString(), publicId);
-      return result.changes > 0 ? toRecord(q.byPublicId.get(publicId)) : null;
+    async setFoodConfirmed(publicId, confirmed) {
+      const result = await client.execute({
+        sql: 'UPDATE rsvps SET food_confirmed = ?, updated_at = ? WHERE public_id = ?',
+        args: [confirmed ? 1 : 0, new Date().toISOString(), publicId],
+      });
+      return result.rowsAffected > 0 ? byPublicId(publicId) : null;
     },
 
-    delete: (publicId) => q.delete.run(publicId).changes > 0,
+    delete: async (publicId) => (await client.execute({ sql: 'DELETE FROM rsvps WHERE public_id = ?', args: [publicId] })).rowsAffected > 0,
 
-    close: () => db.close(),
+    close: () => client.close(),
   };
 }

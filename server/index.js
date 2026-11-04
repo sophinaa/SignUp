@@ -38,13 +38,19 @@ if (env.SITE_URL) {
 }
 
 const trustProxy = env.TRUST_PROXY ? (/^\d+$/.test(env.TRUST_PROXY) ? Number(env.TRUST_PROXY) : env.TRUST_PROXY) : false;
-const dbFile = resolve(env.DATA_DIR || 'data', 'rsvps.sqlite');
-const db = openDatabase(dbFile);
+// Hosted Turso database if configured, otherwise a local SQLite file.
+const dbUrl = env.TURSO_DATABASE_URL || `file:${resolve(env.DATA_DIR || 'data', 'rsvps.sqlite')}`;
+if (env.TURSO_DATABASE_URL && !env.TURSO_AUTH_TOKEN) {
+  console.error('TURSO_DATABASE_URL is set but TURSO_AUTH_TOKEN is not.');
+  process.exit(1);
+}
+const db = await openDatabase(dbUrl, { authToken: env.TURSO_AUTH_TOKEN });
+const dbLabel = env.TURSO_DATABASE_URL ? 'Turso (hosted)' : dbUrl.slice('file:'.length);
 
 const app = createApp({ db, config, appSecret, organiserPassword, siteUrl, production, trustProxy });
 const port = Number(env.PORT) || 3000;
 const server = app.listen(port, () => {
-  console.log(`Shared Light Café is running on http://localhost:${port} (database: ${dbFile})`);
+  console.log(`Shared Light Café is running on http://localhost:${port} (database: ${dbLabel})`);
 });
 
 function shutdown() {

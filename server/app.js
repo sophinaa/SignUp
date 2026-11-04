@@ -113,14 +113,14 @@ export function createApp(options) {
     res.json({ formToken: formToken(signer, now().getTime()) });
   });
 
-  app.post('/api/rsvps', noStore, limit(rsvpLimiter, 'rsvp'), (req, res) => {
+  app.post('/api/rsvps', noStore, limit(rsvpLimiter, 'rsvp'), async (req, res) => {
     const body = req.body && typeof req.body === 'object' ? req.body : {};
 
     // A retried submission (e.g. the first response was lost on a bad
     // connection) returns the booking it already created.
     const submissionId = typeof body.submissionId === 'string' && SUBMISSION_ID_RE.test(body.submissionId) ? body.submissionId : null;
     if (submissionId) {
-      const existing = db.findBySubmissionId(submissionId);
+      const existing = await db.findBySubmissionId(submissionId);
       if (existing) return res.status(200).json({ ...guestResponse(existing), replayed: true });
     }
 
@@ -139,7 +139,8 @@ export function createApp(options) {
     if (Object.keys(errors).length) return validationFailed(res, errors);
 
     try {
-      const rsvp = db.create(value, submissionId);
+      const { rsvp, replayed } = await db.create(value, submissionId);
+      if (replayed) return res.status(200).json({ ...guestResponse(rsvp), replayed: true });
       res.status(201).json(guestResponse(rsvp));
     } catch (err) {
       if (err instanceof DuplicateEmailError) return duplicateEmail(res);
@@ -147,9 +148,9 @@ export function createApp(options) {
     }
   });
 
-  const findGuestBooking = (req, res, next) => {
+  const findGuestBooking = async (req, res, next) => {
     const publicId = readManageToken(signer, req.params.token);
-    const rsvp = publicId && db.findById(publicId);
+    const rsvp = publicId && (await db.findById(publicId));
     if (!rsvp) return res.status(404).json({ error: 'We couldn’t find this booking. It may have been cancelled.' });
     req.rsvp = rsvp;
     next();
@@ -159,20 +160,20 @@ export function createApp(options) {
     res.json(guestResponse(req.rsvp));
   });
 
-  app.put('/api/booking/:token', noStore, limit(manageLimiter, 'manage'), findGuestBooking, (req, res) => {
+  app.put('/api/booking/:token', noStore, limit(manageLimiter, 'manage'), findGuestBooking, async (req, res) => {
     // Guests who already have a booking may still adjust food after the deadline.
     const { value, errors } = validateRsvp(req.body, { foodOpen: true });
     if (Object.keys(errors).length) return validationFailed(res, errors);
     try {
-      res.json(guestResponse(db.updateFromGuest(req.rsvp.id, value)));
+      res.json(guestResponse(await db.updateFromGuest(req.rsvp.id, value)));
     } catch (err) {
       if (err instanceof DuplicateEmailError) return duplicateEmail(res);
       throw err;
     }
   });
 
-  app.delete('/api/booking/:token', noStore, limit(manageLimiter, 'manage'), findGuestBooking, (req, res) => {
-    db.delete(req.rsvp.id);
+  app.delete('/api/booking/:token', noStore, limit(manageLimiter, 'manage'), findGuestBooking, async (req, res) => {
+    await db.delete(req.rsvp.id);
     res.status(204).end();
   });
 
@@ -218,29 +219,29 @@ export function createApp(options) {
     res.type('html').send(organiserPage(view()));
   });
 
-  app.get('/organiser/export.csv', requireOrganiserPage, (req, res) => {
+  app.get('/organiser/export.csv', requireOrganiserPage, async (req, res) => {
     const stamp = now().toISOString().slice(0, 10);
     res.set('Content-Disposition', `attachment; filename="shared-light-cafe-rsvps-${stamp}.csv"`);
-    res.type('text/csv; charset=utf-8').send(rsvpsToCsv(db.list(), { timeZone: config.timezone }));
+    res.type('text/csv; charset=utf-8').send(rsvpsToCsv(await db.list(), { timeZone: config.timezone }));
   });
 
-  app.get('/api/organiser/rsvps', requireOrganiserApi, (req, res) => {
-    res.json({ rsvps: db.list().map(({ submissionId, ...rest }) => rest) });
+  app.get('/api/organiser/rsvps', requireOrganiserApi, async (req, res) => {
+    res.json({ rsvps: (await db.list()).map(({ submissionId, ...rest }) => rest) });
   });
 
-  app.patch('/api/organiser/rsvps/:id', requireOrganiserApi, (req, res) => {
+  app.patch('/api/organiser/rsvps/:id', requireOrganiserApi, async (req, res) => {
     if (!PUBLIC_ID_RE.test(req.params.id) || typeof req.body?.foodConfirmed !== 'boolean') {
       return res.status(400).json({ error: 'Invalid request.' });
     }
-    const updated = db.setFoodConfirmed(req.params.id, req.body.foodConfirmed);
+    const updated = await db.setFoodConfirmed(req.params.id, req.body.foodConfirmed);
     if (!updated) return res.status(404).json({ error: 'RSVP not found.' });
     const { submissionId, ...rest } = updated;
     res.json({ rsvp: rest });
   });
 
-  app.delete('/api/organiser/rsvps/:id', requireOrganiserApi, (req, res) => {
+  app.delete('/api/organiser/rsvps/:id', requireOrganiserApi, async (req, res) => {
     if (!PUBLIC_ID_RE.test(req.params.id)) return res.status(400).json({ error: 'Invalid request.' });
-    if (!db.delete(req.params.id)) return res.status(404).json({ error: 'RSVP not found.' });
+    if (!(await db.delete(req.params.id))) return res.status(404).json({ error: 'RSVP not found.' });
     res.status(204).end();
   });
 

@@ -8,7 +8,7 @@ const PASSWORD = 'organiser-test-password';
 const SECRET = 'x'.repeat(40);
 
 async function startServer(overrides = {}) {
-  const db = overrides.db ?? openDatabase(':memory:');
+  const db = overrides.db ?? (await openDatabase(':memory:'));
   const app = createApp({
     db,
     config: overrides.config ?? baseConfig,
@@ -136,7 +136,7 @@ describe('RSVP submission', () => {
     assert.equal(data.event.timeLabel, 'To be confirmed');
     assert.equal(data.event.calendarUrl, null);
     assert.ok(data.manageToken);
-    assert.equal(srv.db.list().length, 1);
+    assert.equal((await srv.db.list()).length, 1);
   });
 
   test('requires name, email and a food choice', async () => {
@@ -167,12 +167,12 @@ describe('RSVP submission', () => {
   });
 
   test('duplicate email (any case) is refused with a helpful message', async () => {
-    const before = srv.db.list().length;
+    const before = (await srv.db.list()).length;
     const { status, data } = await rsvp(srv.base, guest({ email: 'AMINA@Example.com ' }));
     assert.equal(status, 409);
     assert.equal(data.code, 'duplicate_email');
     assert.ok(data.fields.email);
-    assert.equal(srv.db.list().length, before);
+    assert.equal((await srv.db.list()).length, before);
   });
 
   test('a retried submission returns the same booking instead of a duplicate', async () => {
@@ -181,7 +181,7 @@ describe('RSVP submission', () => {
     const [first, second] = await Promise.all([rsvp(srv.base, body, { token }), rsvp(srv.base, body, { token })]);
     assert.deepEqual([first.status, second.status].sort(), [200, 201]);
     assert.equal(first.data.manageToken, second.data.manageToken);
-    assert.equal(srv.db.list().filter((r) => r.email === 'retry@example.com').length, 1);
+    assert.equal((await srv.db.list()).filter((r) => r.email === 'retry@example.com').length, 1);
   });
 
   test('honeypot and missing form token are rejected', async () => {
@@ -189,7 +189,7 @@ describe('RSVP submission', () => {
     const missing = await rsvp(srv.base, guest({ email: 'bot2@example.com' }), { token: 'forged.token' });
     assert.equal(missing.status, 400);
     assert.equal(missing.data.code, 'invalid_form');
-    assert.equal(srv.db.list().some((r) => r.email.startsWith('bot')), false);
+    assert.equal((await srv.db.list()).some((r) => r.email.startsWith('bot')), false);
   });
 
   test('cross-site submissions are blocked', async () => {
@@ -201,7 +201,7 @@ describe('RSVP submission', () => {
 
   test('a server error is reported as a failure, not a success', async () => {
     const broken = await startServer({
-      db: { ...openDatabase(':memory:'), create: () => { throw new Error('disk full'); }, findBySubmissionId: () => null },
+      db: { ...(await openDatabase(':memory:')), create: async () => { throw new Error('disk full'); }, findBySubmissionId: async () => null },
     });
     const origError = console.error;
     console.error = () => {};
@@ -222,7 +222,7 @@ describe('anti-spam timing and rate limiting', () => {
     const srv = await startServer({ minSubmitMs: 60_000 });
     const { status } = await rsvp(srv.base, guest());
     assert.equal(status, 400);
-    assert.equal(srv.db.list().length, 0);
+    assert.equal((await srv.db.list()).length, 0);
     await srv.close();
   });
 
@@ -270,12 +270,12 @@ describe('guest manage link', () => {
     });
 
   test('loads and updates the booking; food changes reset organiser confirmation', async () => {
-    const id = srv.db.list()[0].id;
-    srv.db.setFoodConfirmed(id, true);
+    const id = (await srv.db.list())[0].id;
+    await srv.db.setFoodConfirmed(id, true);
     assert.equal((await (await call(token)).json()).rsvp.email, 'amina@example.com');
     const res = await call(token, 'PUT', guest({ dish: 'Rice pudding', category: 'sweet' }));
     assert.equal(res.status, 200);
-    const saved = srv.db.findById(id);
+    const saved = await srv.db.findById(id);
     assert.equal(saved.dish, 'Rice pudding');
     assert.equal(saved.foodConfirmed, false);
   });
@@ -288,7 +288,7 @@ describe('guest manage link', () => {
 
   test('cancelling deletes the booking', async () => {
     assert.equal((await call(token, 'DELETE')).status, 204);
-    assert.equal(srv.db.list().length, 0);
+    assert.equal((await srv.db.list()).length, 0);
     assert.equal((await call(token)).status, 404);
   });
 });
@@ -313,13 +313,13 @@ describe('organiser access', () => {
       assert.equal(res.headers.get('location'), '/organiser/login');
     }
 
-    const id = srv.db.list()[0].id;
+    const id = (await srv.db.list())[0].id;
     const patch = await fetch(`${srv.base}/api/organiser/rsvps/${id}`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: '{"foodConfirmed":true}',
     });
     assert.equal(patch.status, 401);
     assert.equal((await fetch(`${srv.base}/api/organiser/rsvps/${id}`, { method: 'DELETE' })).status, 401);
-    assert.equal(srv.db.list().length, 2);
+    assert.equal((await srv.db.list()).length, 2);
   });
 
   test('forged or expired session cookies are rejected', async () => {

@@ -2,8 +2,8 @@
 
 A single-page RSVP site for Shared Light Café (Sunday 22 November 2026), with a password-protected organiser view.
 
-- **Stack:** React + TypeScript hero, Vite, Tailwind CSS and a shadcn/ui Button; Node.js 22 (≥ 22.13), Express and SQLite via Node's built-in `node:sqlite`.
-- **Data:** RSVPs are saved in one SQLite file, `rsvps.sqlite`, inside `DATA_DIR`.
+- **Stack:** React + TypeScript hero, Vite, Tailwind CSS and a shadcn/ui Button; Node.js 22 (≥ 22.13), Express and SQLite via `@libsql/client`.
+- **Data:** RSVPs are saved in one SQLite file, `rsvps.sqlite`, inside `DATA_DIR`. On hosts without a persistent disk, they go to a hosted [Turso](https://turso.tech) database instead (same SQLite format).
 - **Media:** the cinematic hero uses Google Fonts (Instrument Serif and Inter) and the supplied CloudFront video. There is no analytics.
 
 ## Run it locally
@@ -23,7 +23,8 @@ npm test                 # automated checks
 | `APP_SECRET` | In production | A random string of 32+ characters. It signs guest manage links, organiser sessions and anti-spam tokens. Generate one with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`. **If you change it, every guest's manage link stops working**, so set it once and keep it. |
 | `ORGANISER_PASSWORD` | To use `/organiser` | At least 12 characters. If it isn't set, the organiser view is disabled. Changing it signs all organisers out. |
 | `SITE_URL` | Recommended | The public address, e.g. `https://sharedlightcafe.example.org`. It's used for the WhatsApp/Instagram link-preview image and calendar files. |
-| `DATA_DIR` | Recommended | The folder for the database (default `./data`). It **must be on persistent storage.** |
+| `DATA_DIR` | Recommended | The folder for the database (default `./data`). It **must be on persistent storage.** Ignored when `TURSO_DATABASE_URL` is set. |
+| `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN` | For free hosting | Store RSVPs in a hosted Turso database (`libsql://…`) instead of a local file. Needed on hosts with no persistent disk, such as Render's free plan. |
 | `NODE_ENV` | In production | Set this to `production`. It enables secure cookies and HSTS, and the server won't start without `APP_SECRET`. |
 | `TRUST_PROXY` | Usually `1` when hosted | The number of reverse proxies in front of the app, so rate limiting sees each visitor's real IP address. |
 | `PORT` | No | Default is `3000`. Most hosts set it for you. |
@@ -62,17 +63,28 @@ The page, API and CSV are all checked on the server. Without a valid session, th
 
 ## Deployment
 
-The app is a single long-running Node process that needs a **persistent disk** for the SQLite file. Serverless platforms with temporary filesystems (Vercel, Netlify Functions) **won't work**, because RSVPs would be lost.
+The app is a single long-running Node process. RSVPs must be stored somewhere that survives restarts: either a persistent disk (`DATA_DIR`) or a hosted Turso database (`TURSO_DATABASE_URL`). GitHub Pages can't host it, because Pages only serves static files.
 
-Good fits:
+### Free: Render + Turso
 
-- **Render:** create a Web Service with build command `npm ci && npm run build` and start command `npm start`. Add a Disk mounted at `/data` and set `DATA_DIR=/data`.
+1. **Turso** (free): sign up at [turso.tech](https://turso.tech) and create a database (any name, e.g. `shared-light`). From the database page, copy its **URL** (`libsql://…`) and create an **auth token**.
+2. **Render** (free): click **New → Blueprint** and pick this repo. [render.yaml](render.yaml) sets up the service. When asked, enter:
+   - `ORGANISER_PASSWORD`: 12+ characters
+   - `SITE_URL`: e.g. `https://shared-light-cafe.onrender.com`
+   - `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN`: from step 1
+3. Open the site, send a test RSVP, and check it appears at `/organiser`.
+
+On Render's free plan the site sleeps after 15 minutes without visitors, and the next visitor waits about a minute while it wakes. RSVPs are safe in Turso throughout.
+
+### Other hosts
+
+- **Render (paid, with a disk):** in [render.yaml](render.yaml), set `plan: starter`, add a disk mounted at `/data`, set `DATA_DIR=/data`, and remove the Turso variables.
 - **Fly.io or Railway:** use the included `Dockerfile` and attach a volume at `/data`.
 - **Any VPS:** run `npm ci && npm run build && npm prune --omit=dev && npm start` behind Caddy or nginx with HTTPS, and keep it running with systemd or pm2.
 
-For any host, set `NODE_ENV=production`, `APP_SECRET`, `ORGANISER_PASSWORD`, `SITE_URL`, `DATA_DIR` and `TRUST_PROXY=1`. Always serve the site over HTTPS. `/healthz` returns `{"ok":true}` for uptime checks.
+For any host, set `NODE_ENV=production`, `APP_SECRET`, `ORGANISER_PASSWORD`, `SITE_URL`, `TRUST_PROXY=1`, and either `DATA_DIR` (on a persistent disk) or the two Turso variables. Always serve the site over HTTPS. `/healthz` returns `{"ok":true}` for uptime checks.
 
-**Backups:** while the app is stopped, copy `rsvps.sqlite` (plus any `-wal`/`-shm` files next to it). Or download the CSV regularly from the organiser view.
+**Backups:** download the CSV regularly from the organiser view. With a local file, you can also copy `rsvps.sqlite` (plus any `-wal`/`-shm` files next to it) while the app is stopped.
 
 **Privacy:** once the event is over, consider deleting the database (or removing RSVPs from the organiser view). Keep any contact details for people who ticked the future-events box if you plan to use them.
 
@@ -82,7 +94,7 @@ For any host, set `NODE_ENV=production`, `APP_SECRET`, `ORGANISER_PASSWORD`, `SI
 config/event.js          event details (edit this)
 server/index.js          startup and environment variables
 server/app.js            routes
-server/db.js             SQLite storage
+server/db.js             RSVP storage (local SQLite file or Turso)
 server/security.js       signing, sessions, rate limiting, headers
 server/views.js          HTML pages
 server/event.js, ics.js, csv.js
