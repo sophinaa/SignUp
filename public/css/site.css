@@ -1104,3 +1104,533 @@ td input[type='checkbox'] {
     opacity: 0.6;
   }
 }
+
+/* RSVP card: framed invitation ------------------------------------------- */
+
+@font-face {
+  font-family: 'Great Vibes';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/great-vibes-latin-400-normal.woff2') format('woff2');
+}
+
+.simple-rsvp > .wrap {
+  max-width: 34rem;
+}
+.simple-rsvp {
+  --frame-outside: var(--cream);
+}
+.rsvp-frame {
+  position: relative;
+  margin: 1.25rem 0.5rem;
+  padding: 2.75rem 1.5rem 3rem;
+  background: transparent;
+  border: 1.5px solid var(--olive-900);
+  border-radius: 28px;
+  color: var(--olive-900);
+}
+@media (min-width: 40rem) {
+  .rsvp-frame {
+    padding: 3.25rem 3rem 3.5rem;
+  }
+}
+
+/* Ornaments sit on the border, with a paper "gap" behind them. */
+.frame-ornament {
+  position: absolute;
+  left: 50%;
+  width: 7.5rem;
+  height: 1.75rem;
+  transform: translateX(-50%);
+  padding: 0 0.4rem;
+  background: var(--frame-outside);
+  color: var(--olive-900);
+}
+.frame-top {
+  top: -0.95rem;
+}
+.frame-bottom {
+  bottom: -0.95rem;
+}
+.frame-vine {
+  position: absolute;
+  top: 38%;
+  width: 1.5rem;
+  height: 7.5rem;
+  padding: 0.3rem 0;
+  background: var(--frame-outside);
+  color: var(--olive-900);
+}
+.frame-vine-left {
+  left: -0.8rem;
+}
+.frame-vine-right {
+  right: -0.8rem;
+  transform: scaleX(-1);
+}
+
+.simple-rsvp .rsvp-frame .rsvp-script {
+  position: relative;
+  width: fit-content;
+  margin: 0 auto 1rem;
+  padding: 0 0.5rem 0.4rem;
+  font: 400 clamp(3.6rem, 15vw, 4.6rem) / 1 'Great Vibes', 'Snell Roundhand', cursive;
+  letter-spacing: 0;
+  color: var(--olive-900);
+  text-align: center;
+}
+.simple-rsvp .rsvp-frame .rsvp-script::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0.75rem;
+  bottom: 0;
+  height: 1.5px;
+  background: currentColor;
+  border-radius: 2px;
+  transform: rotate(-2deg);
+}
+.sparkle {
+  position: absolute;
+  color: var(--olive-900);
+}
+.sparkle-top {
+  width: 1.4rem;
+  height: 1.4rem;
+  top: -1.4rem;
+  right: 18%;
+}
+.sparkle-left {
+  width: 1rem;
+  height: 1rem;
+  top: 45%;
+  left: -1.6rem;
+}
+
+.simple-rsvp .event-summary {
+  text-align: center;
+  color: var(--olive-700);
+  font-size: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+/* Form fields */
+.simple-rsvp .rsvp-form {
+  margin-top: 0;
+}
+.simple-rsvp .field > label,
+.simple-rsvp .field > legend,
+.simple-rsvp .food-details legend {
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 1.1rem;
+  color: var(--olive-900);
+  margin-bottom: 0.45rem;
+}
+.simple-rsvp .optional,
+.simple-rsvp .hint {
+  color: var(--olive-700);
+}
+.simple-rsvp input[type='text'],
+.simple-rsvp input[type='email'],
+.simple-rsvp input[type='number'],
+.simple-rsvp select {
+  min-height: 3.1rem;
+  padding: 0.65rem 1.35rem;
+  border: 1.5px solid var(--control);
+  border-radius: 999px;
+  background: #fffdf7;
+}
+.simple-rsvp select {
+  padding-right: 2.75rem;
+  background-position: calc(100% - 1.6rem) 55%, calc(100% - 1.25rem) 55%;
+}
+.simple-rsvp textarea {
+  min-height: 3.6rem;
+  padding: 0.8rem 1.35rem;
+  border: 1.5px solid var(--control);
+  border-radius: 24px;
+  background: #fffdf7;
+}
+
+/* Bringing food: a simple vertical list of round radios. */
+.simple-rsvp .choices {
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.simple-rsvp .choice,
+.simple-rsvp .choice:has(input:checked) {
+  min-height: 2.75rem;
+  padding: 0.25rem 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  font-weight: 400;
+  font-size: 1.1rem;
+  gap: 0.8rem;
+}
+.simple-rsvp .choice input {
+  appearance: none;
+  -webkit-appearance: none;
+  display: grid;
+  place-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: 2px solid var(--olive-700);
+  border-radius: 50%;
+  background: #fffdf7;
+  cursor: pointer;
+}
+.simple-rsvp .choice input::before {
+  content: '';
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 50%;
+  background: var(--terracotta);
+  transform: scale(0);
+  transition: transform 0.12s ease;
+}
+.simple-rsvp .choice input:checked {
+  border-color: var(--terracotta);
+}
+.simple-rsvp .choice input:checked::before {
+  transform: scale(1);
+}
+.simple-rsvp .choice:has(input:focus-visible) {
+  outline: none;
+}
+.simple-rsvp .choice input:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+.simple-rsvp .field.has-error .choice input {
+  border-color: var(--error);
+}
+
+.simple-rsvp .food-details {
+  margin: 0 0 1.4rem;
+  padding: 1.25rem 1.25rem 0.25rem;
+  border: 1px dashed var(--control);
+  border-radius: 22px;
+  background: var(--paper);
+}
+
+.simple-rsvp .privacy {
+  border-top: 0;
+  padding-top: 0;
+  text-align: center;
+}
+
+/* Full-width submit, like a printed card's reply button. */
+.simple-rsvp .rsvp-form .form-actions .btn {
+  min-height: 3.4rem;
+  border-color: var(--olive-900);
+  border-radius: 999px;
+  background: var(--olive-900);
+  color: var(--paper);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.simple-rsvp .rsvp-form .form-actions .btn:hover {
+  background: #2f3218;
+  border-color: #2f3218;
+}
+
+/* Confirmation sits inside the same frame. */
+.simple-rsvp .success {
+  background: none;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+}
+
+@media (max-width: 22rem) {
+  .frame-vine,
+  .sparkle-left {
+    display: none;
+  }
+}
+
+/* Pill hero: CA · pill · FÉ ------------------------------------------------ */
+/* Everything is sized from --fs, the font size of the word.
+   Default (no JS / reduced motion): one static screen with a solid pill, the
+   RSVP letter following below. With JS, .ph-scroll turns the pill into a
+   window: scrolling opens it to full screen, and the letter rises behind it. */
+
+@font-face {
+  font-family: 'Inter Variable';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fonts/inter-latin-wght-normal.woff2') format('woff2-variations');
+}
+
+.pill-hero {
+  --fs: min(19.6vh, 13.2vw);
+  --ph-start: var(--cream);
+  --ph-ink: var(--olive-900);
+  --ph-ink-2: var(--olive-700);
+  --ph-rule: var(--control);
+  --ph-hair: var(--control);
+  --ph-window: var(--sand);
+  position: relative;
+  color: var(--ph-ink);
+  font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
+}
+
+.ph-stage {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  min-height: 30rem;
+  overflow: hidden;
+  background: var(--ph-start);
+}
+
+/* Nav */
+.ph-nav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: calc(var(--fs) * 0.14) calc(var(--fs) * 0.27) 0;
+  font-size: max(12px, calc(var(--fs) * 0.072));
+  font-weight: 450;
+}
+.ph-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3em 1.6em;
+  color: var(--ph-ink-2);
+}
+.ph-links a {
+  color: var(--ph-ink);
+  text-decoration: none;
+}
+.ph-links a:hover {
+  color: var(--ph-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+}
+
+/* Word */
+.ph-word {
+  position: absolute;
+  top: 43%;
+  left: 50%;
+  z-index: 1;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 0.085em;
+  margin: 0;
+  font-size: var(--fs);
+  font-family: inherit;
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 0.8;
+  color: var(--ph-ink);
+  white-space: nowrap;
+}
+.ph-half {
+  position: relative;
+  z-index: 1;
+  display: block;
+}
+.ph-half:last-of-type {
+  /* Tracking adds space after the last letter; keep the word optically centred. */
+  margin-right: -0.045em;
+}
+
+/* Pill */
+.ph-pill {
+  position: relative;
+  flex: none;
+  display: block;
+  width: 3.62em;
+  height: 1.81em;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--ph-window);
+}
+.ph-hair {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--ph-hair);
+  opacity: 0;
+}
+
+/* Footer */
+.ph-foot {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  gap: calc(var(--fs) * 0.18);
+  padding: 0 calc(var(--fs) * 0.27) calc(var(--fs) * 0.14);
+}
+.ph-copy {
+  flex: none;
+  width: calc(var(--fs) * 1.42);
+  margin: 0;
+  font-size: max(12px, calc(var(--fs) * 0.066));
+  line-height: 1.45;
+  color: var(--ph-ink-2);
+}
+.ph-copy::first-letter {
+  float: left;
+  margin: 0.06em 0.08em 0 0;
+  font-size: 2.35em;
+  font-weight: 650;
+  line-height: 0.82;
+  color: var(--ph-ink);
+}
+.ph-rule {
+  position: relative;
+  flex: 1;
+  align-self: center;
+  height: 1px;
+  margin-top: 0.4em;
+  background: var(--ph-rule);
+  transform-origin: center;
+}
+.ph-hint {
+  display: none;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  padding: 0 0.9em;
+  background: var(--ph-start);
+  color: var(--ph-ink-2);
+  font-size: max(12px, calc(var(--fs) * 0.06));
+  font-weight: 450;
+  white-space: nowrap;
+}
+.ph-btn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(var(--fs) * 0.26);
+  padding: 0 1.7em;
+  border-radius: 999px;
+  background: var(--terracotta);
+  color: var(--paper);
+  font-size: max(13px, calc(var(--fs) * 0.07));
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.ph-btn:hover {
+  background: var(--terracotta-dark);
+  color: var(--paper);
+}
+.ph-btn:focus-visible,
+.ph-links a:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+/* The RSVP letter sits on the same colour seen through the window. */
+body .simple-rsvp.rsvp-section {
+  --frame-outside: var(--sand);
+  background: var(--sand);
+}
+
+/* ---- Scroll mode (added by pill-hero.js) ---- */
+/* The hero is 100svh of scroll travel plus the pinned screen. The pill is a
+   transparent hole: its huge spread shadow paints the cream around it. The
+   RSVP section is pulled up under the stage, so it rises into the opening. */
+
+.ph-scroll {
+  height: 200vh;
+  height: 200svh;
+  background: var(--sand);
+}
+.ph-scroll .ph-stage {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: transparent;
+  pointer-events: none;
+}
+.ph-scroll .ph-stage a {
+  pointer-events: auto;
+}
+.ph-scroll .ph-pill {
+  overflow: visible;
+  background: transparent;
+  box-shadow: 0 0 0 200vmax var(--ph-start);
+}
+.ph-scroll .ph-hint {
+  display: block;
+}
+.ph-scroll.is-open .ph-stage {
+  visibility: hidden;
+}
+body.ph-scroll-on .simple-rsvp.rsvp-section {
+  position: relative;
+  z-index: 1;
+  margin-top: -100vh;
+  margin-top: -100svh;
+  border-top: 0 !important;
+}
+
+/* Phone: the word stacks, CA over the pill over FÉ. */
+@media (max-width: 720px) {
+  .pill-hero {
+    --fs: min(34vw, 16.5vh);
+  }
+  .ph-nav {
+    padding: 18px 20px 0;
+    font-size: 12.5px;
+  }
+  .ph-date {
+    display: none;
+  }
+  .ph-word {
+    top: 47%;
+    flex-direction: column;
+    gap: 0.2em; /* room for the accent on É */
+  }
+  .ph-half,
+  .ph-half:last-of-type {
+    margin-right: -0.045em;
+  }
+  .ph-pill {
+    width: calc(100vw - 40px);
+    height: calc((100vw - 40px) / 1.85);
+  }
+  .ph-foot {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px 16px;
+    padding: 0 20px 20px;
+  }
+  .ph-copy {
+    width: 100%;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .ph-rule {
+    margin-top: 0;
+  }
+  .ph-hint {
+    font-size: 12px;
+  }
+  .ph-btn {
+    min-height: 38px;
+    font-size: 14px;
+  }
+}

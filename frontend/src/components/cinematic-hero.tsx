@@ -33,7 +33,7 @@ export function CinematicHero() {
     <section className="relative isolate flex min-h-svh flex-col overflow-hidden bg-background text-foreground" aria-labelledby="cinematic-title">
       <video
         ref={videoRef}
-        className="absolute inset-0 z-0 h-full w-full object-cover"
+        className="cinematic-video absolute inset-0 z-0 h-full w-full object-cover"
         autoPlay
         loop
         muted
@@ -56,8 +56,8 @@ export function CinematicHero() {
 
       <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 py-[90px] text-center md:pt-32 md:pb-40">
         <h1 id="cinematic-title" aria-label="Where dreams rise through the silence." className="animate-fade-rise m-0 max-w-7xl text-5xl leading-[0.95] font-normal tracking-[-2.46px] text-foreground sm:text-7xl md:text-8xl" style={displayFont}>
-          Where <em className="not-italic text-muted-foreground">dreams</em> rise<br className="hidden sm:block" />{' '}
-          <em className="not-italic text-muted-foreground">through the silence.</em>
+          Where <em className="not-italic text-primary">dreams</em> rise<br className="hidden sm:block" />{' '}
+          <em className="not-italic text-primary">through the silence.</em>
         </h1>
         <p className="animate-fade-rise-delay mt-8 mb-0 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
           We’re designing tools for deep thinkers, bold creators, and quiet rebels. Amid the chaos, we build digital spaces for sharp focus and inspired work.

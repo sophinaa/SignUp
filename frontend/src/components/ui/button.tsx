@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 
 // shadcn/ui Button with the supplied liquid-glass variant.
 const buttonVariants = cva(
-  'inline-flex shrink-0 items-center justify-center whitespace-nowrap font-normal cursor-pointer transition-transform focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex shrink-0 items-center justify-center whitespace-nowrap font-normal cursor-pointer transition-transform focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-foreground disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {

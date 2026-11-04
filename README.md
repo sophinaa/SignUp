@@ -96,4 +96,4 @@ The home-page hero lives in `frontend/src/components/cinematic-hero.tsx`. Both R
 
 Run `npm run build` after editing the React code, or run `npm run dev:hero` in a second terminal for rebuilds while the Express server is running. The build also type-checks TypeScript. The Docker image builds the frontend before removing development dependencies.
 
-The supplied video plays muted and loops. A small playback control lets visitors pause it; reduced-motion preferences disable the entrance animation and pause the video. The navy background remains when the video cannot load.
+The supplied video plays muted and loops. A small playback control lets visitors pause it; reduced-motion preferences disable the entrance animation and pause the video. The cream background remains when the video cannot load. The poster’s cream, olive, mustard and terracotta palette is used throughout, with a warm, subdued treatment on the video.

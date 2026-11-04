@@ -4,7 +4,7 @@ export const esc = (value) =>
   String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
 // Bump when CSS/JS change so phones don't keep a stale cached copy.
-const ASSET_VERSION = '5';
+const ASSET_VERSION = '6';
 
 // ---- Illustrations (decorative, hidden from screen readers) ---------------------
 
@@ -15,6 +15,50 @@ const ICONS = {
 };
 
 const LOGO = `<svg class="logo" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><circle cx="16" cy="10" r="5" fill="var(--terracotta-soft)" stroke="var(--terracotta)" stroke-width="1.6"/><path d="M6 17h18v3a9 9 0 0 1-9 9h0a9 9 0 0 1-9-9z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M24 19h1.5a3 3 0 0 1 0 6H23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
+
+// Hand-drawn sprigs and sparkles framing the RSVP card.
+const SPARKLE = `<svg class="sparkle" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 1v22M1 12h22M4.2 4.2l15.6 15.6M19.8 4.2 4.2 19.8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`;
+
+const SPRIG = `<path d="M4 20c14-1 26-6 36-14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M13 18c-1-4 1-7 4-8-1 4-1 6-4 8zM22 15c0-4 2-6 5-7-1 4-2 5-5 7zM31 11c0-3 2-5 5-6-1 3-2 5-5 6zM15 18c3 2 6 2 8 0-3-1-5-1-8 0zM25 14c3 1 5 1 7-1-3-1-5-1-7 1z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>`;
+
+const VINE = `<svg class="frame-vine" viewBox="0 0 24 120" aria-hidden="true" focusable="false"><path d="M12 4c-4 20 4 36 0 56s4 36 0 56" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><g fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"><path d="M11 22c-6-1-8-5-8-9 5 1 8 4 8 9zM13 40c6-1 8-5 8-9-5 1-8 4-8 9zM11 62c-6-1-8-5-8-9 5 1 8 4 8 9zM13 82c6-1 8-5 8-9-5 1-8 4-8 9zM11 102c-6-1-8-5-8-9 5 1 8 4 8 9z"/></g><circle cx="5" cy="70" r="1.8" fill="currentColor"/></svg>`;
+
+const FRAME_ORNAMENTS = `<svg class="frame-ornament frame-top" viewBox="0 0 120 28" aria-hidden="true" focusable="false"><g transform="translate(60 0) scale(-1 1)">${SPRIG}</g><g transform="translate(60 0)">${SPRIG}</g><circle cx="60" cy="21" r="3" fill="var(--terracotta-soft)" stroke="var(--terracotta)" stroke-width="1.4"/></svg>
+<svg class="frame-ornament frame-bottom" viewBox="0 0 120 28" aria-hidden="true" focusable="false"><g transform="translate(60 28) scale(-1 -1)">${SPRIG}</g><g transform="translate(60 28) scale(1 -1)">${SPRIG}</g><circle cx="60" cy="14" r="6" fill="var(--terracotta-soft)" stroke="var(--terracotta)" stroke-width="1.6"/><path d="M60 3v3M60 22v3M49 14h3M68 14h3" stroke="var(--terracotta)" stroke-width="1.4" stroke-linecap="round"/></svg>
+${VINE.replace('class="frame-vine"', 'class="frame-vine frame-vine-left"')}${VINE.replace('class="frame-vine"', 'class="frame-vine frame-vine-right"')}`;
+
+// ---- Pill hero ------------------------------------------------------------------
+// "CA · pill · FÉ": scrolling opens the hairline between the halves into a
+// slit, a circle, a pill and finally the whole screen, revealing the RSVP
+// letter rising behind it. Animation lives in public/js/pill-hero.js.
+
+function pillHero(ev) {
+  return `<section class="pill-hero" id="hero" aria-labelledby="hero-title">
+  <div class="ph-stage">
+    <nav class="ph-nav" aria-label="Main">
+      <div class="ph-links">
+        <a href="/">${esc(ev.name)}</a>
+        <span class="ph-date">${esc(ev.dateLabel)}</span>
+      </div>
+      <div class="ph-links">
+        <a href="#rsvp">RSVP</a>
+      </div>
+    </nav>
+    <h1 class="ph-word" id="hero-title">
+      <span class="visually-hidden">${esc(ev.name)}</span>
+      <span class="ph-half" aria-hidden="true">CA</span>
+      <span class="ph-pill" aria-hidden="true"><span class="ph-hair"></span></span>
+      <span class="ph-half" aria-hidden="true">FÉ</span>
+    </h1>
+    <div class="ph-foot">
+      <p class="ph-copy">Join us for a relaxed gathering to meet new people, share food and build community. Whether you’re a revert, exploring Islam or coming along to connect, you’re welcome.</p>
+      <span class="ph-rule" aria-hidden="true"><span class="ph-hint">Scroll to open</span></span>
+      <a class="ph-btn" href="#rsvp">RSVP</a>
+    </div>
+  </div>
+</section>
+<script src="/js/pill-hero.js?v=${ASSET_VERSION}"></script>`;
+}
 
 // ---- Shared page shell ----------------------------------------------------------
 
@@ -33,8 +77,8 @@ ${noindex ? '<meta name="robots" content="noindex, nofollow">' : ''}
 <meta property="og:description" content="${esc(description)}">
 ${url ? `<meta property="og:url" content="${url}">` : ''}
 ${url && ogImage ? `<meta property="og:image" content="${url}${esc(ogImage)}">\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n<meta name="twitter:card" content="summary_large_image">` : ''}
-<meta name="theme-color" content="${cinematic ? '#002b42' : '#fbefd5'}">
-<meta name="color-scheme" content="${cinematic ? 'dark' : 'light'}">
+<meta name="theme-color" content="#fbefd5">
+<meta name="color-scheme" content="light">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/fonts/bodoni-moda-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/fraunces-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
@@ -245,11 +289,12 @@ export function homePage(ev, { formToken, siteUrl, ogImage }) {
   const deadline = ev.foodDeadlineLabel.replace(/^\w+ /, '').replace(/ \d{4}$/, '');
   const body = `<a class="skip-link" href="#rsvp">Skip to the RSVP form</a>
 <main id="main">
-  <div id="cinematic-hero"></div>
-  <noscript><section class="wrap section"><h1>Where dreams rise through the silence.</h1><a class="btn" href="#rsvp">RSVP</a></section></noscript>
+  ${pillHero(ev)}
   <section class="section rsvp-section simple-rsvp" id="rsvp" aria-labelledby="rsvp-title" tabindex="-1">
     <div class="wrap narrow">
-      <h2 id="rsvp-title">RSVP</h2>
+      <div class="rsvp-frame">
+      ${FRAME_ORNAMENTS}
+      <h2 id="rsvp-title" class="rsvp-script">${SPARKLE.replace('class="sparkle"', 'class="sparkle sparkle-top"')}${SPARKLE.replace('class="sparkle"', 'class="sparkle sparkle-left"')}<span aria-hidden="true">Rsvp</span><span class="visually-hidden">RSVP</span></h2>
       <div class="event-summary" id="rsvp-intro">
         <p>${esc(ev.name)} · ${esc(ev.dateLabel)}<br>${location}</p>
         ${ev.venueAddress ? `<p>${esc(ev.venueAddress)}</p>` : ''}
@@ -260,6 +305,7 @@ export function homePage(ev, { formToken, siteUrl, ogImage }) {
       </div>
       ${rsvpForm(ev, { mode: 'create', formToken })}
       ${confirmationPanel(ev)}
+      </div>
     </div>
   </section>
 </main>`;
@@ -271,7 +317,7 @@ export function homePage(ev, { formToken, siteUrl, ogImage }) {
     body,
     bodyClass: 'cinematic-page',
     cinematic: true,
-    scripts: ['/hero/hero.js', '/js/rsvp.js'],
+    scripts: ['/js/rsvp.js'],
   });
 }
 

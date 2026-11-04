@@ -15,7 +15,7 @@ import {
 
 const here = (p) => fileURLToPath(new URL(p, import.meta.url));
 const PUBLIC_DIR = here('../public/');
-const FONT_DIRS = [here('../node_modules/@fontsource/bodoni-moda/files/'), here('../node_modules/@fontsource/fraunces/files/'), here('../node_modules/@fontsource/source-sans-3/files/')];
+const FONT_DIRS = [here('../node_modules/@fontsource-variable/inter/files/'), here('../node_modules/@fontsource/great-vibes/files/'), here('../node_modules/@fontsource/bodoni-moda/files/'), here('../node_modules/@fontsource/fraunces/files/'), here('../node_modules/@fontsource/source-sans-3/files/')];
 
 const SUBMISSION_ID_RE = /^[A-Za-z0-9-]{8,64}$/;
 const PUBLIC_ID_RE = /^[0-9a-f-]{36}$/;
