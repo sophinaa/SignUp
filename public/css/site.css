@@ -1568,21 +1568,33 @@ body .simple-rsvp.rsvp-section {
 }
 
 /* ---- Scroll mode (added by pill-hero.js) ---- */
-/* The hero is 100svh of scroll travel plus the pinned screen. The pill is a
+/* The hero is --ph-travel of scrolling plus the pinned screen. The pill is a
    transparent hole: its huge spread shadow paints the cream around it. The
-   RSVP section is pulled up under the stage, so it rises into the opening. */
+   RSVP section is pulled up under the stage, so it rises into the opening.
+   The stage is the largest screen height (lvh), so it still covers the page
+   when a phone's toolbar shrinks or floats; the word and footer stay inside
+   the smallest height (svh), clear of the toolbar. */
 
 .ph-scroll {
+  --ph-travel: 100svh;
   height: 200vh;
-  height: 200svh;
+  height: calc(var(--ph-travel) + 100lvh);
   background: var(--sand);
 }
 .ph-scroll .ph-stage {
   position: sticky;
   top: 0;
   z-index: 2;
+  height: 100vh;
+  height: 100lvh;
   background: transparent;
   pointer-events: none;
+}
+.ph-scroll .ph-word {
+  top: calc(100svh * 0.43);
+}
+.ph-scroll .ph-foot {
+  bottom: calc(100lvh - 100svh);
 }
 .ph-scroll .ph-stage a {
   pointer-events: auto;
@@ -1602,7 +1614,7 @@ body.ph-scroll-on .simple-rsvp.rsvp-section {
   position: relative;
   z-index: 1;
   margin-top: -100vh;
-  margin-top: -100svh;
+  margin-top: -100lvh;
   border-top: 0 !important;
 }
 
@@ -1618,8 +1630,11 @@ body.ph-scroll-on .simple-rsvp.rsvp-section {
   .ph-date {
     display: none;
   }
+  .ph-word,
+  .ph-scroll .ph-word {
+    top: calc(100svh * 0.47);
+  }
   .ph-word {
-    top: 47%;
     flex-direction: column;
     gap: 0.2em; /* room for the accent on É */
   }
@@ -1651,6 +1666,16 @@ body.ph-scroll-on .simple-rsvp.rsvp-section {
   .ph-btn {
     min-height: 38px;
     font-size: 14px;
+  }
+  .hosts-logos {
+    flex-wrap: nowrap;
+    gap: 1.25rem;
+  }
+  .hosts-logos img {
+    height: 56px;
+  }
+  .hosts-logos .host-tile {
+    border-radius: 8px;
   }
 }
 

@@ -3,8 +3,9 @@
 // pill and finally the whole screen, with the RSVP letter rising into view
 // behind it.
 //
-// Where the browser supports scroll-driven animations, the timeline follows
-// the scroll natively (smooth on phones); otherwise a scroll listener drives it.
+// A scroll listener drives the timeline. (Native scroll timelines were tried:
+// iOS Safari measured them against a different screen height than the pinned
+// stage, so the window started part-open and stuttered.)
 //
 // Loaded as a classic script straight after the hero markup, so the scroll
 // layout is in place before the first paint. Without JS, or with reduced
@@ -23,6 +24,7 @@
   const foot = $('.ph-foot');
   const rule = $('.ph-rule');
   const LETTER_LEAD = 0.2; // letter starts this many screen-heights higher and rises a little slower
+  const CLOSED = 0.05; // the window stays shut for the first bit of scrolling
 
   const DURATION = 1000; // timeline length; scroll progress maps onto it
   const E1 = 'cubic-bezier(.5,0,.3,1)';
@@ -56,7 +58,8 @@
     if (!isPhone()) {
       const h = 1.81 * fs;
       return [
-        { offset: 0, width: '0px', height: `${h}px`, borderRadius: `${h / 2}px`, easing: E1 },
+        { offset: 0, width: '0px', height: `${h}px`, borderRadius: `${h / 2}px` },
+        { offset: CLOSED, width: '0px', height: `${h}px`, borderRadius: `${h / 2}px`, easing: E1 },
         { offset: 0.15, width: `${0.16 * fs}px`, height: `${h}px`, borderRadius: `${h / 2}px`, easing: E2 },
         { offset: 0.35, width: `${h}px`, height: `${h}px`, borderRadius: `${h / 2}px`, easing: E3 },
         { offset: 0.6, width: `${3.62 * fs}px`, height: `${h}px`, borderRadius: `${h / 2}px`, easing: E3 },
@@ -66,7 +69,8 @@
     const w = vw - 40;
     const h = w / 1.85;
     return [
-      { offset: 0, width: `${w}px`, height: '0px', borderRadius: `${h / 2}px`, easing: E1 },
+      { offset: 0, width: `${w}px`, height: '0px', borderRadius: `${h / 2}px` },
+      { offset: CLOSED, width: `${w}px`, height: '0px', borderRadius: `${h / 2}px`, easing: E1 },
       { offset: 0.15, width: `${w}px`, height: `${h * 0.1}px`, borderRadius: `${h / 2}px`, easing: E2 },
       { offset: 0.35, width: `${w}px`, height: `${h * 0.55}px`, borderRadius: `${h / 2}px`, easing: E3 },
       { offset: 0.6, width: `${w}px`, height: `${h}px`, borderRadius: `${h / 2}px`, easing: E3 },
@@ -74,41 +78,28 @@
     ];
   }
 
-  // Native scroll timeline: progress 0 when the hero's top reaches the top of
-  // the screen, 1 when its bottom reaches the bottom (the stage is pinned in
-  // between). Null if unsupported, and then update() drives the animations.
-  function nativeTimeline() {
-    if (!('ViewTimeline' in window)) return null;
-    try {
-      const opts = { timeline: new ViewTimeline({ subject: hero }), rangeStart: 'contain 0%', rangeEnd: 'contain 100%', fill: 'both' };
-      pill.animate([{}, {}], opts).cancel();
-      return opts;
-    } catch {
-      return null;
-    }
-  }
-  const native = nativeTimeline();
-
   let scrollAnims = [];
 
   function buildScroll() {
     scrollAnims.forEach((a) => a.cancel());
-    const opts = native || { duration: DURATION, fill: 'both' };
+    const opts = { duration: DURATION, fill: 'both' };
     const gaps = isPhone() ? ['0.2em', '0.34em'] : ['0em', '0.085em'];
     scrollAnims = [
       pill.animate(pillFrames(), opts),
-      word.animate(hold('gap', gaps[0], gaps[1], 0, 0.6, E3), opts),
+      word.animate(hold('gap', gaps[0], gaps[1], CLOSED, 0.6, E3), opts),
       ...[...halves].map((h) => h.animate(hold('opacity', 1, 0, 0.6, 0.8), opts)),
       nav.animate(hold('opacity', 1, 0, 0.6, 0.85), opts),
       foot.animate(hold('opacity', 1, 0, 0.1, 0.35), opts),
     ];
     // The letter comes after this script in the page, so look it up each build.
+    // Phones skip the rise: the letter then moves only with the page scroll,
+    // which the browser keeps perfectly smooth.
     const letter = document.getElementById('rsvp');
-    if (letter) {
+    if (letter && !isPhone()) {
       const lead = -LETTER_LEAD * stage.clientHeight;
       scrollAnims.push(letter.animate([{ transform: `translateY(${lead}px)` }, { transform: 'translateY(0)' }], opts));
     }
-    if (!native) scrollAnims.forEach((a) => a.pause());
+    scrollAnims.forEach((a) => a.pause());
     update();
   }
 
@@ -122,7 +113,7 @@
   function update() {
     ticking = false;
     const p = progress();
-    if (!native) for (const a of scrollAnims) a.currentTime = p * DURATION;
+    for (const a of scrollAnims) a.currentTime = p * DURATION;
     // Fully open: hide the stage so it can't sit over the form.
     hero.classList.toggle('is-open', p >= 0.999);
   }

@@ -4,7 +4,7 @@ export const esc = (value) =>
   String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
 // Bump when CSS/JS change so phones don't keep a stale cached copy.
-const ASSET_VERSION = '8';
+const ASSET_VERSION = '9';
 
 // ---- Illustrations (decorative, hidden from screen readers) ---------------------
 
