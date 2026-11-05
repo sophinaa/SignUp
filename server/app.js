@@ -32,7 +32,7 @@ export function createApp(options) {
   const rsvpLimiter = createRateLimiter({ windowMs: 15 * 60 * 1000, max: limits.rsvp });
   const manageLimiter = createRateLimiter({ windowMs: 15 * 60 * 1000, max: limits.manage });
   const loginLimiter = createRateLimiter({ windowMs: 15 * 60 * 1000, max: limits.login });
-  const ogImage = existsSync(`${PUBLIC_DIR}og-image.png`) ? '/og-image.png' : null;
+  const ogImage = existsSync(`${PUBLIC_DIR}og-image.png`) ? '/og-image.png?v=2' : null; // bump ?v= when the image changes, so link previews refetch it
 
   const app = express();
   app.disable('x-powered-by');
