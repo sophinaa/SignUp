@@ -1367,10 +1367,11 @@ td input[type='checkbox'] {
 
 .pill-hero {
   --fs: min(19.6vh, 13.2vw);
-  --ph-start: var(--cream);
-  --ph-ink: var(--olive-900);
-  --ph-ink-2: var(--olive-700);
-  --ph-rule: var(--control);
+  /* Cream on green: the page's two main colours, swapped. */
+  --ph-start: var(--olive-900);
+  --ph-ink: var(--cream);
+  --ph-ink-2: rgba(251, 239, 213, 0.78);
+  --ph-rule: rgba(251, 239, 213, 0.45);
   --ph-window: var(--sand);
   position: relative;
   color: var(--ph-ink);
@@ -1528,7 +1529,7 @@ td input[type='checkbox'] {
 }
 .ph-btn:focus-visible,
 .ph-links a:focus-visible {
-  outline: 3px solid var(--focus);
+  outline: 3px solid var(--ph-ink);
   outline-offset: 3px;
 }
 
@@ -1562,9 +1563,6 @@ body .simple-rsvp.rsvp-section {
   display: block;
   width: auto;
   height: 96px;
-}
-.hosts-logos .host-tile {
-  border-radius: 12px;
 }
 
 /* ---- Scroll mode (added by pill-hero.js) ---- */
@@ -1673,9 +1671,6 @@ body.ph-scroll-on .simple-rsvp.rsvp-section {
   }
   .hosts-logos img {
     height: 56px;
-  }
-  .hosts-logos .host-tile {
-    border-radius: 8px;
   }
 }
 

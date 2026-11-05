@@ -4,7 +4,7 @@ export const esc = (value) =>
   String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
 // Bump when CSS/JS change so phones don't keep a stale cached copy.
-const ASSET_VERSION = '9';
+const ASSET_VERSION = '13';
 
 // ---- Illustrations (decorative, hidden from screen readers) ---------------------
 
@@ -61,7 +61,7 @@ function pillHero(ev) {
 
 // ---- Shared page shell ----------------------------------------------------------
 
-function layout({ title, description, siteUrl, ogImage, body, scripts = [], bodyClass = '', noindex = false, cinematic = false }) {
+function layout({ title, description, siteUrl, ogImage, body, scripts = [], bodyClass = '', noindex = false, cinematic = false, themeColor = '#fbefd5' }) {
   const url = siteUrl ? esc(siteUrl) : null;
   return `<!doctype html>
 <html lang="en-GB">
@@ -76,7 +76,7 @@ ${noindex ? '<meta name="robots" content="noindex, nofollow">' : ''}
 <meta property="og:description" content="${esc(description)}">
 ${url ? `<meta property="og:url" content="${url}">` : ''}
 ${url && ogImage ? `<meta property="og:image" content="${url}${esc(ogImage)}">\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n<meta name="twitter:card" content="summary_large_image">` : ''}
-<meta name="theme-color" content="#fbefd5">
+<meta name="theme-color" content="${themeColor}">
 <meta name="color-scheme" content="light">
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="/favicon-64.png" sizes="64x64" type="image/png">
@@ -312,7 +312,7 @@ export function homePage(ev, { formToken, siteUrl, ogImage }) {
         <p class="hosts-label">Hosted by</p>
         <div class="hosts-logos">
           <img src="/images/duis.png" alt="DUIS" width="360" height="291" loading="lazy">
-          <img class="host-tile" src="/images/faith-project.jpg" alt="The Faith Project" width="500" height="230" loading="lazy">
+          <img src="/images/faith-project.svg" alt="The Faith Project" width="477" height="196" loading="lazy">
         </div>
       </div>
     </div>
@@ -326,6 +326,7 @@ export function homePage(ev, { formToken, siteUrl, ogImage }) {
     body,
     bodyClass: 'cinematic-page',
     cinematic: true,
+    themeColor: '#414522', // matches the green hero, so phone browser bars blend in
     scripts: ['/js/rsvp.js'],
   });
 }
