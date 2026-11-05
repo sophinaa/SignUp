@@ -1,6 +1,10 @@
 import { test, describe, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { openDatabase } from '../server/db.js';
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { createClient } from '@libsql/client';
+import { openDatabase, DuplicatePhoneError } from '../server/db.js';
 import { createApp } from '../server/app.js';
 import baseConfig from '../config/event.js';
 
@@ -36,7 +40,7 @@ async function formTokenFrom(base) {
 
 const guest = (over = {}) => ({
   fullName: 'Amina Rahman',
-  email: 'amina@example.com',
+  phone: '07700 900001',
   dietary: 'Nut allergy',
   bringing: 'yes',
   dish: 'Lentil soup',
@@ -88,7 +92,7 @@ describe('public page', () => {
     assert.doesNotMatch(html, /Add to calendar/);
     assert.doesNotMatch(html, /mailto:/);
     assert.doesNotMatch(html, /confirmation email will|we(’|')ve (sent|emailed)/i);
-    assert.match(html, /We don’t send confirmation emails/);
+    assert.match(html, /We don’t send confirmation messages/);
   });
 
   test('new RSVPs omit marketing while existing bookings retain an optional opt-in', async () => {
@@ -159,63 +163,63 @@ describe('RSVP submission', () => {
     assert.equal((await srv.db.list()).length, 1);
   });
 
-  test('requires name, email and a food choice', async () => {
-    const { status, data } = await rsvp(srv.base, { fullName: ' ', email: 'not-an-email' });
+  test('requires name, phone and a food choice', async () => {
+    const { status, data } = await rsvp(srv.base, { fullName: ' ', phone: '12ab' });
     assert.equal(status, 422);
-    assert.deepEqual(Object.keys(data.fields).sort(), ['bringing', 'email', 'fullName']);
+    assert.deepEqual(Object.keys(data.fields).sort(), ['bringing', 'fullName', 'phone']);
   });
 
   test('requires a dish for confirmed contributions only', async () => {
-    const yes = await rsvp(srv.base, guest({ email: 'yes@example.com', dish: '' }));
+    const yes = await rsvp(srv.base, guest({ phone: '07700 900101', dish: '' }));
     assert.equal(yes.status, 422);
     assert.ok(yes.data.fields.dish);
-    const maybe = await rsvp(srv.base, guest({ email: 'maybe@example.com', bringing: 'maybe', dish: '' }));
+    const maybe = await rsvp(srv.base, guest({ phone: '07700 900102', bringing: 'maybe', dish: '' }));
     assert.equal(maybe.status, 201);
   });
 
   test('rejects invalid categories and servings', async () => {
-    const { status, data } = await rsvp(srv.base, guest({ email: 'bad@example.com', category: 'soup', servings: '2.5' }));
+    const { status, data } = await rsvp(srv.base, guest({ phone: '07700 900103', category: 'soup', servings: '2.5' }));
     assert.equal(status, 422);
     assert.ok(data.fields.category && data.fields.servings);
   });
 
   test('drops food details when not bringing anything', async () => {
-    const { status, data } = await rsvp(srv.base, guest({ email: 'no@example.com', bringing: 'no' }));
+    const { status, data } = await rsvp(srv.base, guest({ phone: '07700 900104', bringing: 'no' }));
     assert.equal(status, 201);
     assert.equal(data.rsvp.dish, '');
     assert.equal(data.rsvp.servings, null);
   });
 
-  test('duplicate email (any case) is refused with a helpful message', async () => {
+  test('duplicate phone number (written any way) is refused with a helpful message', async () => {
     const before = (await srv.db.list()).length;
-    const { status, data } = await rsvp(srv.base, guest({ email: 'AMINA@Example.com ' }));
+    const { status, data } = await rsvp(srv.base, guest({ phone: '+44 (0)7700-900001 ' }));
     assert.equal(status, 409);
-    assert.equal(data.code, 'duplicate_email');
-    assert.ok(data.fields.email);
+    assert.equal(data.code, 'duplicate_phone');
+    assert.ok(data.fields.phone);
     assert.equal((await srv.db.list()).length, before);
   });
 
   test('a retried submission returns the same booking instead of a duplicate', async () => {
     const token = await formTokenFrom(srv.base);
-    const body = guest({ email: 'retry@example.com', submissionId: 'retry-submission-0001' });
+    const body = guest({ phone: '07700 900300', submissionId: 'retry-submission-0001' });
     const [first, second] = await Promise.all([rsvp(srv.base, body, { token }), rsvp(srv.base, body, { token })]);
     assert.deepEqual([first.status, second.status].sort(), [200, 201]);
     assert.equal(first.data.manageToken, second.data.manageToken);
-    assert.equal((await srv.db.list()).filter((r) => r.email === 'retry@example.com').length, 1);
+    assert.equal((await srv.db.list()).filter((r) => r.phone === '+447700900300').length, 1);
   });
 
   test('honeypot and missing form token are rejected', async () => {
-    assert.equal((await rsvp(srv.base, guest({ email: 'bot1@example.com', website: 'http://spam' }))).status, 400);
-    const missing = await rsvp(srv.base, guest({ email: 'bot2@example.com' }), { token: 'forged.token' });
+    assert.equal((await rsvp(srv.base, guest({ phone: '07700 900201', website: 'http://spam' }))).status, 400);
+    const missing = await rsvp(srv.base, guest({ phone: '07700 900202' }), { token: 'forged.token' });
     assert.equal(missing.status, 400);
     assert.equal(missing.data.code, 'invalid_form');
-    assert.equal((await srv.db.list()).some((r) => r.email.startsWith('bot')), false);
+    assert.equal((await srv.db.list()).some((r) => r.phone.startsWith('+4477009002')), false);
   });
 
   test('cross-site submissions are blocked', async () => {
-    const res = await rsvp(srv.base, guest({ email: 'csrf@example.com' }), { headers: { Origin: 'https://evil.example' } });
+    const res = await rsvp(srv.base, guest({ phone: '07700 900105' }), { headers: { Origin: 'https://evil.example' } });
     assert.equal(res.status, 403);
-    const fetchMeta = await rsvp(srv.base, guest({ email: 'csrf@example.com' }), { headers: { 'Sec-Fetch-Site': 'cross-site' } });
+    const fetchMeta = await rsvp(srv.base, guest({ phone: '07700 900106' }), { headers: { 'Sec-Fetch-Site': 'cross-site' } });
     assert.equal(fetchMeta.status, 403);
   });
 
@@ -250,7 +254,7 @@ describe('anti-spam timing and rate limiting', () => {
     const srv = await startServer({ limits: { rsvp: 2 } });
     const token = await formTokenFrom(srv.base);
     const statuses = [];
-    for (let i = 0; i < 3; i++) statuses.push((await rsvp(srv.base, guest({ email: `r${i}@example.com` }), { token })).status);
+    for (let i = 0; i < 3; i++) statuses.push((await rsvp(srv.base, guest({ phone: `07700 90040${i}` }), { token })).status);
     assert.deepEqual(statuses, [201, 201, 429]);
     await srv.close();
   });
@@ -292,7 +296,7 @@ describe('guest manage link', () => {
   test('loads and updates the booking; food changes reset organiser confirmation', async () => {
     const id = (await srv.db.list())[0].id;
     await srv.db.setFoodConfirmed(id, true);
-    assert.equal((await (await call(token)).json()).rsvp.email, 'amina@example.com');
+    assert.equal((await (await call(token)).json()).rsvp.phone, '+447700900001');
     const res = await call(token, 'PUT', guest({ dish: 'Rice pudding', category: 'sweet' }));
     assert.equal(res.status, 200);
     const saved = await srv.db.findById(id);
@@ -318,7 +322,7 @@ describe('organiser access', () => {
   before(async () => {
     srv = await startServer();
     await rsvp(srv.base, guest());
-    await rsvp(srv.base, guest({ fullName: '=HYPERLINK("x")', email: 'formula@example.com', bringing: 'no', dietary: '' }));
+    await rsvp(srv.base, guest({ fullName: '=HYPERLINK("x")', phone: '07700 900107', bringing: 'no', dietary: '' }));
   });
   after(() => srv.close());
 
@@ -367,7 +371,7 @@ describe('organiser access', () => {
 
     const { rsvps } = await (await fetch(`${srv.base}/api/organiser/rsvps`, { headers: { Cookie: cookie } })).json();
     assert.equal(rsvps.length, 2);
-    const amina = rsvps.find((r) => r.email === 'amina@example.com');
+    const amina = rsvps.find((r) => r.phone === '+447700900001');
     assert.equal(amina.dish, 'Lentil soup');
     assert.equal(amina.dietary, 'Nut allergy');
 
@@ -381,9 +385,9 @@ describe('organiser access', () => {
     const bytes = Buffer.from(await (await fetch(`${srv.base}/organiser/export.csv`, { headers: { Cookie: cookie } })).arrayBuffer());
     assert.deepEqual([...bytes.subarray(0, 3)], [0xef, 0xbb, 0xbf], 'UTF-8 BOM for Excel');
     const csv = bytes.toString('utf8');
-    assert.match(csv, /^\uFEFFFull name,Email/);
+    assert.match(csv, /^\uFEFFFull name,Phone,Email \(early RSVPs\)/);
     assert.match(csv, /,\d{4}-\d{2}-\d{2} \d{2}:\d{2},/);
-    assert.match(csv, /Amina Rahman,amina@example\.com,Nut allergy,Yes,Lentil soup,Savoury,10/);
+    assert.match(csv, /Amina Rahman,'\+447700900001,,Nut allergy,Yes,Lentil soup,Savoury,10/);
     assert.match(csv, /"'=HYPERLINK\(""x""\)"/);
   });
 
@@ -402,5 +406,34 @@ describe('organiser access', () => {
     for (let i = 0; i < 3; i++) statuses.push((await login(limited.base, 'nope-nope-nope')).status);
     assert.deepEqual(statuses, [401, 401, 429]);
     await limited.close();
+  });
+});
+
+describe('database', () => {
+  test('an email-based database moves to phone numbers and keeps its RSVPs', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'slc-'));
+    const url = `file:${join(dir, 'old.sqlite')}`;
+    const old = createClient({ url });
+    await old.execute(`CREATE TABLE rsvps (id INTEGER PRIMARY KEY, public_id TEXT NOT NULL UNIQUE, submission_id TEXT UNIQUE,
+      full_name TEXT NOT NULL, email TEXT NOT NULL UNIQUE COLLATE NOCASE, dietary TEXT NOT NULL DEFAULT '',
+      bringing TEXT NOT NULL, dish TEXT NOT NULL DEFAULT '', category TEXT NOT NULL DEFAULT '', servings INTEGER,
+      ingredients TEXT NOT NULL DEFAULT '', food_notes TEXT NOT NULL DEFAULT '', food_confirmed INTEGER NOT NULL DEFAULT 0,
+      marketing_opt_in INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)`);
+    await old.execute(`INSERT INTO rsvps (public_id, full_name, email, bringing, created_at, updated_at)
+      VALUES ('early-1', 'Early Guest', 'early@example.com', 'no', '2026-11-01T10:00:00Z', '2026-11-01T10:00:00Z')`);
+    old.close();
+
+    const db = await openDatabase(url);
+    const [early] = await db.list();
+    assert.equal(early.fullName, 'Early Guest');
+    assert.equal(early.email, 'early@example.com');
+    assert.equal(early.phone, null);
+    const value = { fullName: 'New Guest', phone: '+447700900999', dietary: '', bringing: 'no', dish: '', category: '', servings: null, ingredients: '', foodNotes: '', marketingOptIn: false };
+    await db.create(value);
+    await assert.rejects(db.create({ ...value, fullName: 'Twin' }), DuplicatePhoneError);
+    assert.equal((await db.list()).length, 2);
+    db.close();
+    await openDatabase(url).then((again) => again.close()); // already migrated: opens cleanly
+    await rm(dir, { recursive: true, force: true });
   });
 });

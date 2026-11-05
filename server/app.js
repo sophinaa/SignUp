@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { existsSync } from 'node:fs';
 import { validateRsvp } from '../public/js/validation.js';
 import { eventView, publicEventDetails } from './event.js';
-import { DuplicateEmailError } from './db.js';
+import { DuplicatePhoneError } from './db.js';
 import { buildIcs } from './ics.js';
 import { rsvpsToCsv } from './csv.js';
 import { homePage, managePage, loginPage, organiserPage } from './views.js';
@@ -57,7 +57,7 @@ export function createApp(options) {
   const guestResponse = (rsvp) => ({
     rsvp: {
       fullName: rsvp.fullName,
-      email: rsvp.email,
+      phone: rsvp.phone || '',
       dietary: rsvp.dietary,
       bringing: rsvp.bringing,
       dish: rsvp.dish,
@@ -74,11 +74,11 @@ export function createApp(options) {
   const validationFailed = (res, errors) =>
     res.status(422).json({ error: 'Some details need checking.', fields: errors });
 
-  const duplicateEmail = (res) =>
+  const duplicatePhone = (res) =>
     res.status(409).json({
-      error: 'There’s already an RSVP for this email address, so you’re on the list. To change your details, use the private link from your confirmation.',
-      fields: { email: 'This email address already has an RSVP.' },
-      code: 'duplicate_email',
+      error: 'There’s already an RSVP for this phone number, so you’re on the list. To change your details, use the private link from your confirmation.',
+      fields: { phone: 'This phone number already has an RSVP.' },
+      code: 'duplicate_phone',
     });
 
   const noStore = (req, res, next) => {
@@ -143,7 +143,7 @@ export function createApp(options) {
       if (replayed) return res.status(200).json({ ...guestResponse(rsvp), replayed: true });
       res.status(201).json(guestResponse(rsvp));
     } catch (err) {
-      if (err instanceof DuplicateEmailError) return duplicateEmail(res);
+      if (err instanceof DuplicatePhoneError) return duplicatePhone(res);
       throw err;
     }
   });
@@ -167,7 +167,7 @@ export function createApp(options) {
     try {
       res.json(guestResponse(await db.updateFromGuest(req.rsvp.id, value)));
     } catch (err) {
-      if (err instanceof DuplicateEmailError) return duplicateEmail(res);
+      if (err instanceof DuplicatePhoneError) return duplicatePhone(res);
       throw err;
     }
   });

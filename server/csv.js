@@ -4,7 +4,8 @@ const BRINGING_LABELS = { yes: 'Yes', maybe: 'Maybe', no: 'No' };
 
 const COLUMNS = [
   ['Full name', (r) => r.fullName],
-  ['Email', (r) => r.email],
+  ['Phone', (r) => r.phone || ''],
+  ['Email (early RSVPs)', (r) => r.email || ''],
   ['Dietary requirements / allergies', (r) => r.dietary],
   ['Bringing food', (r) => BRINGING_LABELS[r.bringing]],
   ['Dish or item', (r) => r.dish],

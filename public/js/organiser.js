@@ -58,7 +58,7 @@ function renderStats() {
 
 function matches(r, q) {
   if (!q) return true;
-  return [r.fullName, r.email, r.dish, r.dietary, r.ingredients, r.foodNotes].some((v) => v && v.toLowerCase().includes(q));
+  return [r.fullName, r.phone, r.email, r.dish, r.dietary, r.ingredients, r.foodNotes].some((v) => v && v.toLowerCase().includes(q));
 }
 
 function renderAttendees() {
@@ -84,7 +84,7 @@ function renderAttendees() {
     del.addEventListener('click', () => removeRsvp(r));
     const actions = el('td');
     actions.append(del);
-    tr.append(name, el('td', r.email), el('td', bringing), el('td', r.dietary || 'None', 'prewrap'), el('td', r.marketingOptIn ? 'Yes' : 'No'), el('td', formatDate(r.createdAt)), actions);
+    tr.append(name, el('td', r.phone || r.email || 'Not given'), el('td', bringing), el('td', r.dietary || 'None', 'prewrap'), el('td', r.marketingOptIn ? 'Yes' : 'No'), el('td', formatDate(r.createdAt)), actions);
     body.append(tr);
   }
   $('search-count').textContent = q ? `Showing ${shown.length} of ${rsvps.length} attendees.` : '';

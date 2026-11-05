@@ -4,7 +4,7 @@ export const esc = (value) =>
   String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
 // Bump when CSS/JS change so phones don't keep a stale cached copy.
-const ASSET_VERSION = '7';
+const ASSET_VERSION = '8';
 
 // ---- Illustrations (decorative, hidden from screen readers) ---------------------
 
@@ -27,7 +27,7 @@ const FRAME_ORNAMENTS = `<img class="frame-plate" src="/images/croissants.webp" 
 ${CUP}`;
 
 // ---- Pill hero ------------------------------------------------------------------
-// "CA · pill · FÉ": scrolling opens the hairline between the halves into a
+// "CA · pill · FÉ": scrolling opens a gap between the halves into a
 // slit, a circle, a pill and finally the whole screen, revealing the RSVP
 // letter rising behind it. Animation lives in public/js/pill-hero.js.
 
@@ -46,7 +46,7 @@ function pillHero(ev) {
     <h1 class="ph-word" id="hero-title">
       <span class="visually-hidden">${esc(ev.name)}</span>
       <span class="ph-half" aria-hidden="true">CA</span>
-      <span class="ph-pill" aria-hidden="true"><span class="ph-hair"></span></span>
+      <span class="ph-pill" aria-hidden="true"></span>
       <span class="ph-half" aria-hidden="true">FÉ</span>
     </h1>
     <div class="ph-foot">
@@ -209,9 +209,9 @@ function rsvpForm(ev, { mode, formToken }) {
     input: `<input id="fullName" name="fullName" type="text" autocomplete="name" maxlength="${LIMITS.fullName}" required ${describedBy('fullName', false)}>`,
   })}
   ${field({
-    id: 'email',
-    label: 'Email address',
-    input: `<input id="email" name="email" type="email" inputmode="email" autocomplete="email" spellcheck="false" autocapitalize="off" maxlength="${LIMITS.email}" required ${describedBy('email', false)}>`,
+    id: 'phone',
+    label: 'Phone number',
+    input: `<input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" spellcheck="false" maxlength="${LIMITS.phone}" required ${describedBy('phone', false)}>`,
   })}
   ${field({
     id: 'dietary',
@@ -255,7 +255,7 @@ function confirmationPanel(ev) {
   ${ev.calendarAvailable ? '<p><a class="btn btn-secondary" href="/event.ics" download="shared-light-cafe.ics">Add to calendar</a></p>' : ''}
   <div class="manage-box">
     <h4>Need to make a change?</h4>
-    <p class="small">Save this private link to update or cancel your RSVP. We don’t send confirmation emails.</p>
+    <p class="small">Save this private link to update or cancel your RSVP. We don’t send confirmation messages.</p>
     <div class="copy-row">
       <label for="manage-link" class="visually-hidden">Your private link</label>
       <input id="manage-link" type="text" readonly>
@@ -304,6 +304,13 @@ export function homePage(ev, { formToken, siteUrl, ogImage }) {
       </div>
       ${rsvpForm(ev, { mode: 'create', formToken })}
       ${confirmationPanel(ev)}
+      </div>
+      <div class="hosts">
+        <p class="hosts-label">Hosted by</p>
+        <div class="hosts-logos">
+          <img src="/images/duis.png" alt="DUIS" width="360" height="291" loading="lazy">
+          <img class="host-tile" src="/images/faith-project.jpg" alt="The Faith Project" width="500" height="230" loading="lazy">
+        </div>
       </div>
     </div>
   </section>
@@ -415,13 +422,13 @@ export function organiserPage(ev) {
         ${scriptHeading('h2', 'attendees-title', 'Attendees')}
         <div class="search">
           <label for="search">Search attendees</label>
-          <input id="search" type="search" placeholder="Name, email, dish…" autocomplete="off">
+          <input id="search" type="search" placeholder="Name, phone, dish…" autocomplete="off">
         </div>
       </div>
       <p class="small muted" id="search-count" role="status" aria-live="polite"></p>
       <div class="table-wrap menu-card" role="region" aria-labelledby="attendees-title" tabindex="0">
         <table>
-          <thead><tr><th scope="col">Name</th><th scope="col">Email</th><th scope="col">Bringing</th><th scope="col">Dietary</th><th scope="col">Updates</th><th scope="col">RSVP’d</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
+          <thead><tr><th scope="col">Name</th><th scope="col">Phone</th><th scope="col">Bringing</th><th scope="col">Dietary</th><th scope="col">Updates</th><th scope="col">RSVP’d</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
           <tbody id="attendee-rows"></tbody>
         </table>
       </div>

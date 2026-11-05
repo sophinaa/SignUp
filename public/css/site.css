@@ -612,6 +612,7 @@ code {
 
 input[type='text'],
 input[type='email'],
+input[type='tel'],
 input[type='number'],
 input[type='password'],
 input[type='search'],
@@ -1231,6 +1232,7 @@ td input[type='checkbox'] {
 }
 .simple-rsvp input[type='text'],
 .simple-rsvp input[type='email'],
+.simple-rsvp input[type='tel'],
 .simple-rsvp input[type='number'],
 .simple-rsvp select {
   min-height: 3.1rem;
@@ -1369,7 +1371,6 @@ td input[type='checkbox'] {
   --ph-ink: var(--olive-900);
   --ph-ink-2: var(--olive-700);
   --ph-rule: var(--control);
-  --ph-hair: var(--control);
   --ph-window: var(--sand);
   position: relative;
   color: var(--ph-ink);
@@ -1455,13 +1456,6 @@ td input[type='checkbox'] {
   overflow: hidden;
   background: var(--ph-window);
 }
-.ph-hair {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: var(--ph-hair);
-  opacity: 0;
-}
 
 /* Footer */
 .ph-foot {
@@ -1542,6 +1536,35 @@ td input[type='checkbox'] {
 body .simple-rsvp.rsvp-section {
   --frame-outside: var(--sand);
   background: var(--sand);
+}
+
+/* Hosted by: the two organisations' logos under the letter. */
+.hosts {
+  margin-top: 2.5rem;
+  text-align: center;
+}
+.hosts-label {
+  margin: 0 0 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--olive-700);
+}
+.hosts-logos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem 2.5rem;
+}
+.hosts-logos img {
+  display: block;
+  width: auto;
+  height: 96px;
+}
+.hosts-logos .host-tile {
+  border-radius: 12px;
 }
 
 /* ---- Scroll mode (added by pill-hero.js) ---- */

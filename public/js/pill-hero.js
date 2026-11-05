@@ -1,7 +1,10 @@
-// Scroll-to-open hero. On load a hairline draws between "CA" and "FÉ" and the
-// nav and footer arrive. Scrolling then opens the hairline into a slit, a
-// circle, a pill and finally the whole screen, with the RSVP letter rising
-// into view behind it.
+// Scroll-to-open hero. On load the nav and footer arrive around "CAFÉ".
+// Scrolling then opens a gap between "CA" and "FÉ" into a slit, a circle, a
+// pill and finally the whole screen, with the RSVP letter rising into view
+// behind it.
+//
+// Where the browser supports scroll-driven animations, the timeline follows
+// the scroll natively (smooth on phones); otherwise a scroll listener drives it.
 //
 // Loaded as a classic script straight after the hero markup, so the scroll
 // layout is in place before the first paint. Without JS, or with reduced
@@ -16,7 +19,6 @@
   const pill = $('.ph-pill');
   const word = $('.ph-word');
   const halves = hero.querySelectorAll('.ph-half');
-  const hair = $('.ph-hair');
   const nav = $('.ph-nav');
   const foot = $('.ph-foot');
   const rule = $('.ph-rule');
@@ -54,7 +56,7 @@
     if (!isPhone()) {
       const h = 1.81 * fs;
       return [
-        { offset: 0, width: `${0.012 * fs}px`, height: `${h}px`, borderRadius: '999px', easing: E1 },
+        { offset: 0, width: '0px', height: `${h}px`, borderRadius: `${h / 2}px`, easing: E1 },
         { offset: 0.15, width: `${0.16 * fs}px`, height: `${h}px`, borderRadius: `${h / 2}px`, easing: E2 },
         { offset: 0.35, width: `${h}px`, height: `${h}px`, borderRadius: `${h / 2}px`, easing: E3 },
         { offset: 0.6, width: `${3.62 * fs}px`, height: `${h}px`, borderRadius: `${h / 2}px`, easing: E3 },
@@ -64,7 +66,7 @@
     const w = vw - 40;
     const h = w / 1.85;
     return [
-      { offset: 0, width: `${w}px`, height: '1.5px', borderRadius: '999px', easing: E1 },
+      { offset: 0, width: `${w}px`, height: '0px', borderRadius: `${h / 2}px`, easing: E1 },
       { offset: 0.15, width: `${w}px`, height: `${h * 0.1}px`, borderRadius: `${h / 2}px`, easing: E2 },
       { offset: 0.35, width: `${w}px`, height: `${h * 0.55}px`, borderRadius: `${h / 2}px`, easing: E3 },
       { offset: 0.6, width: `${w}px`, height: `${h}px`, borderRadius: `${h / 2}px`, easing: E3 },
@@ -72,15 +74,29 @@
     ];
   }
 
+  // Native scroll timeline: progress 0 when the hero's top reaches the top of
+  // the screen, 1 when its bottom reaches the bottom (the stage is pinned in
+  // between). Null if unsupported, and then update() drives the animations.
+  function nativeTimeline() {
+    if (!('ViewTimeline' in window)) return null;
+    try {
+      const opts = { timeline: new ViewTimeline({ subject: hero }), rangeStart: 'contain 0%', rangeEnd: 'contain 100%', fill: 'both' };
+      pill.animate([{}, {}], opts).cancel();
+      return opts;
+    } catch {
+      return null;
+    }
+  }
+  const native = nativeTimeline();
+
   let scrollAnims = [];
 
   function buildScroll() {
     scrollAnims.forEach((a) => a.cancel());
-    const opts = { duration: DURATION, fill: 'both' };
-    const gaps = isPhone() ? ['0.2em', '0.2em'] : ['0.026em', '0.085em'];
+    const opts = native || { duration: DURATION, fill: 'both' };
+    const gaps = isPhone() ? ['0.2em', '0.34em'] : ['0em', '0.085em'];
     scrollAnims = [
       pill.animate(pillFrames(), opts),
-      hair.animate(hold('opacity', 1, 0, 0.04, 0.2), opts),
       word.animate(hold('gap', gaps[0], gaps[1], 0, 0.6, E3), opts),
       ...[...halves].map((h) => h.animate(hold('opacity', 1, 0, 0.6, 0.8), opts)),
       nav.animate(hold('opacity', 1, 0, 0.6, 0.85), opts),
@@ -92,7 +108,7 @@
       const lead = -LETTER_LEAD * stage.clientHeight;
       scrollAnims.push(letter.animate([{ transform: `translateY(${lead}px)` }, { transform: 'translateY(0)' }], opts));
     }
-    scrollAnims.forEach((a) => a.pause());
+    if (!native) scrollAnims.forEach((a) => a.pause());
     update();
   }
 
@@ -106,7 +122,7 @@
   function update() {
     ticking = false;
     const p = progress();
-    for (const a of scrollAnims) a.currentTime = p * DURATION;
+    if (!native) for (const a of scrollAnims) a.currentTime = p * DURATION;
     // Fully open: hide the stage so it can't sit over the form.
     hero.classList.toggle('is-open', p >= 0.999);
   }
@@ -118,10 +134,18 @@
     }
   }, { passive: true });
 
+  // Rebuild only when the width changes: on phones the address bar showing and
+  // hiding fires height-only resizes mid-scroll, and the sizes don't depend on it.
   let resizeTimer;
+  let lastWidth = document.documentElement.clientWidth;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(buildScroll, 100);
+    resizeTimer = setTimeout(() => {
+      const width = document.documentElement.clientWidth;
+      if (width === lastWidth) return;
+      lastWidth = width;
+      buildScroll();
+    }, 100);
   });
 
   buildScroll();
@@ -152,15 +176,10 @@
   if (location.hash === '#rsvp') document.addEventListener('DOMContentLoaded', goToOpen);
 
   // ---- Load intro ------------------------------------------------------------------
-  // Uses transforms only, so it never fights the scroll timeline. (The pill
-  // itself isn't clipped: that would also clip the shadow that paints the cream.)
+  // Uses transforms only, so it never fights the scroll timeline.
 
   const intro = { duration: 1100, fill: 'backwards' };
   const introAnims = [
-    hair.animate(
-      [{ transform: isPhone() ? 'scaleX(0)' : 'scaleY(0)' }, { transform: 'scale(1)' }],
-      { ...intro, duration: 500, easing: 'cubic-bezier(.3,0,.2,1)' },
-    ),
     nav.animate([{ transform: 'translateY(-140%)' }, { transform: 'translateY(0)' }], { ...intro, delay: 250, easing: SLIDE }),
     foot.animate([{ transform: 'translateY(160%)' }, { transform: 'translateY(0)' }], { ...intro, delay: 300, easing: SLIDE }),
     rule.animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { ...intro, delay: 200, duration: 1300, easing: E3 }),

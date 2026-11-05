@@ -2,7 +2,7 @@ import { validateRsvp, CATEGORIES } from './validation.js';
 
 const FIELD_LABELS = {
   fullName: 'Full name',
-  email: 'Email address',
+  phone: 'Phone number',
   dietary: 'Dietary requirements or allergies',
   bringing: 'Would you like to bring something to share?',
   dish: 'Dish or item',
@@ -12,7 +12,7 @@ const FIELD_LABELS = {
   foodNotes: 'Notes',
 };
 const FIELD_ORDER = Object.keys(FIELD_LABELS);
-const TEXT_FIELDS = ['fullName', 'email', 'dietary', 'dish', 'category', 'servings', 'ingredients', 'foodNotes'];
+const TEXT_FIELDS = ['fullName', 'phone', 'dietary', 'dish', 'category', 'servings', 'ingredients', 'foodNotes'];
 const REQUEST_TIMEOUT_MS = 20000;
 
 const $ = (id) => document.getElementById(id);
