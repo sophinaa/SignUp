@@ -1681,11 +1681,11 @@ body.ph-scroll-on .simple-rsvp.rsvp-section {
 
 .org-page {
   --card-bg: var(--paper);
-  --frame-outside: var(--sand);
+  --frame-outside: var(--olive-900);
   --ph-ink: var(--cream);
   --ph-ink-2: rgba(251, 239, 213, 0.78);
   --ph-rule: rgba(251, 239, 213, 0.45);
-  background: var(--sand);
+  background: var(--olive-900);
   color: var(--olive-900);
   font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
 }
@@ -2015,4 +2015,44 @@ body.ph-scroll-on .simple-rsvp.rsvp-section {
   .org-page .search {
     width: 100%;
   }
+}
+
+/* Dashboard on green: cream text outside the cards, plain Inter headings. */
+.org-page .organiser {
+  color: var(--ph-ink);
+}
+.org-page .org-status,
+.org-page .organiser .muted {
+  color: var(--ph-ink-2);
+}
+.org-page .organiser .org-script {
+  margin-left: 0;
+  font: 600 clamp(1.6rem, 4.5vw, 2.1rem) / 1.2 'Inter Variable', 'Inter', system-ui, sans-serif !important;
+  letter-spacing: -0.02em;
+  color: var(--ph-ink);
+}
+.org-page .organiser .org-script .rays {
+  display: none;
+}
+.org-page .org-nav a {
+  border-color: var(--ph-rule);
+  color: var(--ph-ink);
+}
+.org-page .org-nav a:hover {
+  border-color: var(--ph-ink);
+  background: var(--ph-ink);
+  color: var(--olive-900);
+}
+.org-page .organiser :focus-visible {
+  outline-color: var(--ph-ink) !important;
+}
+.org-page .organiser .menu-card :focus-visible,
+.org-page .organiser input:focus-visible {
+  outline-color: var(--terracotta) !important;
+}
+/* Cards stay dark text on paper. */
+.org-page .organiser .stat,
+.org-page .organiser .menu-card,
+.org-page .organiser .dietary-list li {
+  color: var(--olive-900);
 }
