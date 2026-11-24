@@ -1680,12 +1680,13 @@ body.ph-scroll-on .simple-rsvp.rsvp-section {
    double rule) for cards and tables. */
 
 .org-page {
+  --org-green: #6c7c59;
   --card-bg: var(--paper);
-  --frame-outside: var(--olive-900);
+  --frame-outside: var(--org-green);
   --ph-ink: var(--cream);
-  --ph-ink-2: rgba(251, 239, 213, 0.78);
+  --ph-ink-2: var(--cream);
   --ph-rule: rgba(251, 239, 213, 0.45);
-  background: var(--olive-900);
+  background: var(--org-green);
   color: var(--olive-900);
   font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
 }
@@ -1704,7 +1705,7 @@ body.ph-scroll-on .simple-rsvp.rsvp-section {
 
 /* Top bar, like the hero nav: cream text on green, no box. */
 .org-bar {
-  background: var(--olive-900);
+  background: var(--org-green);
   color: var(--ph-ink);
   font-size: 0.9rem;
   font-weight: 450;
@@ -1789,8 +1790,8 @@ body.ph-scroll-on .simple-rsvp.rsvp-section {
 /* Sign-in: the sand menu card on green, like the RSVP letter seen through
    the hero's window. */
 .org-login-page {
-  --frame-outside: var(--olive-900);
-  background: var(--olive-900);
+  --frame-outside: var(--org-green);
+  background: var(--org-green);
 }
 .org-login {
   min-height: calc(100vh - 4rem);
@@ -1852,7 +1853,7 @@ body.ph-scroll-on .simple-rsvp.rsvp-section {
 
 /* Dashboard: a green hero band, then the sand page. */
 .org-hero {
-  background: var(--olive-900);
+  background: var(--org-green);
   color: var(--ph-ink);
 }
 .org-page .org-head {

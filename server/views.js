@@ -4,7 +4,7 @@ export const esc = (value) =>
   String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
 // Bump when CSS/JS change so phones don't keep a stale cached copy.
-const ASSET_VERSION = '15';
+const ASSET_VERSION = '16';
 
 // ---- Illustrations (decorative, hidden from screen readers) ---------------------
 
@@ -400,7 +400,7 @@ export function loginPage({ error, configured }) {
     ${CUP}
   </div>
 </main>`;
-  return layout({ title: 'Organiser sign in · Shared Light Café', description: 'Organiser access', body, bodyClass: 'org-page org-login-page', noindex: true, themeColor: '#414522' });
+  return layout({ title: 'Organiser sign in · Shared Light Café', description: 'Organiser access', body, bodyClass: 'org-page org-login-page', noindex: true, themeColor: '#6c7c59' });
 }
 
 export function organiserPage(ev) {
@@ -462,5 +462,5 @@ export function organiserPage(ev) {
     </section>
   </div>
 </main>`;
-  return layout({ title: 'Organiser view · Shared Light Café', description: 'Organiser view', body, scripts: ['/js/organiser.js'], bodyClass: 'org-page', noindex: true, themeColor: '#414522' });
+  return layout({ title: 'Organiser view · Shared Light Café', description: 'Organiser view', body, scripts: ['/js/organiser.js'], bodyClass: 'org-page', noindex: true, themeColor: '#6c7c59' });
 }
