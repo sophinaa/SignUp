@@ -4,7 +4,7 @@ export const esc = (value) =>
   String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
 // Bump when CSS/JS change so phones don't keep a stale cached copy.
-const ASSET_VERSION = '16';
+const ASSET_VERSION = '18';
 
 // ---- Illustrations (decorative, hidden from screen readers) ---------------------
 
@@ -400,7 +400,7 @@ export function loginPage({ error, configured }) {
     ${CUP}
   </div>
 </main>`;
-  return layout({ title: 'Organiser sign in · Shared Light Café', description: 'Organiser access', body, bodyClass: 'org-page org-login-page', noindex: true, themeColor: '#6c7c59' });
+  return layout({ title: 'Organiser sign in · Shared Light Café', description: 'Organiser access', body, bodyClass: 'org-page org-login-page', noindex: true, themeColor: '#414522' });
 }
 
 export function organiserPage(ev) {
@@ -437,7 +437,7 @@ export function organiserPage(ev) {
         </div>
       </div>
       <p class="small muted" id="search-count" role="status" aria-live="polite"></p>
-      <div class="table-wrap menu-card" role="region" aria-labelledby="attendees-title" tabindex="0">
+      <div class="table-wrap" role="region" aria-labelledby="attendees-title" tabindex="0">
         <table>
           <thead><tr><th scope="col">Name</th><th scope="col">Phone</th><th scope="col">Bringing</th><th scope="col">Dietary</th><th scope="col">Updates</th><th scope="col">RSVP’d</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
           <tbody id="attendee-rows"></tbody>
@@ -448,7 +448,7 @@ export function organiserPage(ev) {
     <section id="food" class="org-section" aria-labelledby="food-title">
       ${scriptHeading('h2', 'food-title', 'Food to share')}
       <p class="small muted">“Confirmed” is for organisers to tick once a contribution has been agreed. It resets if the guest changes their food details.</p>
-      <div class="table-wrap menu-card" role="region" aria-labelledby="food-title" tabindex="0">
+      <div class="table-wrap" role="region" aria-labelledby="food-title" tabindex="0">
         <table>
           <thead><tr><th scope="col">Guest</th><th scope="col">Response</th><th scope="col">Dish or item</th><th scope="col">Category</th><th scope="col">Servings</th><th scope="col">Ingredients / allergens</th><th scope="col">Notes</th><th scope="col">Confirmed</th></tr></thead>
           <tbody id="food-rows"></tbody>
@@ -462,5 +462,5 @@ export function organiserPage(ev) {
     </section>
   </div>
 </main>`;
-  return layout({ title: 'Organiser view · Shared Light Café', description: 'Organiser view', body, scripts: ['/js/organiser.js'], bodyClass: 'org-page', noindex: true, themeColor: '#6c7c59' });
+  return layout({ title: 'Organiser view · Shared Light Café', description: 'Organiser view', body, scripts: ['/js/organiser.js'], bodyClass: 'org-page', noindex: true, themeColor: '#414522' });
 }
