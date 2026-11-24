@@ -1675,13 +1675,17 @@ body.ph-scroll-on .simple-rsvp.rsvp-section {
 }
 
 /* Organiser pages: matched to the home page ------------------------------- */
-/* Inter type, script headings with mustard rays, and the café menu card
-   (a fine double rule) for cards and tables. */
+/* The hero's cream-on-green, opening onto the sand of the RSVP letter; Inter
+   type, script headings with mustard rays, and the café menu card (a fine
+   double rule) for cards and tables. */
 
 .org-page {
   --card-bg: var(--paper);
-  --frame-outside: var(--cream);
-  background: var(--cream);
+  --frame-outside: var(--sand);
+  --ph-ink: var(--cream);
+  --ph-ink-2: rgba(251, 239, 213, 0.78);
+  --ph-rule: rgba(251, 239, 213, 0.45);
+  background: var(--sand);
   color: var(--olive-900);
   font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
 }
@@ -1698,7 +1702,13 @@ body.ph-scroll-on .simple-rsvp.rsvp-section {
   box-shadow: inset 0 0 0 4px var(--card-bg), inset 0 0 0 5px var(--olive-900);
 }
 
-/* Top bar, like the hero nav: plain text, no box. */
+/* Top bar, like the hero nav: cream text on green, no box. */
+.org-bar {
+  background: var(--olive-900);
+  color: var(--ph-ink);
+  font-size: 0.9rem;
+  font-weight: 450;
+}
 .org-bar-inner {
   display: flex;
   align-items: center;
@@ -1706,36 +1716,47 @@ body.ph-scroll-on .simple-rsvp.rsvp-section {
   gap: 1rem;
   min-height: 4rem;
 }
+.org-bar-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3em 1.6em;
+  color: var(--ph-ink-2);
+}
 .org-brand {
-  color: var(--olive-900);
+  color: var(--ph-ink);
   font-weight: 600;
   text-decoration: none;
 }
 .org-brand:hover {
-  color: var(--olive-900);
+  color: var(--ph-ink);
   text-decoration: underline;
+  text-decoration-thickness: 1px;
 }
 .org-bar-tag {
-  color: var(--olive-700);
-  font-weight: 450;
+  color: var(--ph-ink-2);
 }
 .org-bar form {
   margin: 0;
 }
 .org-link-btn {
-  min-height: 2.5rem;
+  min-height: 2.4rem;
   padding: 0 1.1rem;
-  border: 1.5px solid var(--olive-900);
+  border: 1.5px solid var(--ph-rule);
   border-radius: 999px;
   background: transparent;
-  color: var(--olive-900);
-  font: 500 0.95rem / 1 inherit;
+  color: var(--ph-ink);
+  font: 500 0.9rem / 1 inherit;
   font-family: inherit;
   cursor: pointer;
 }
 .org-link-btn:hover {
-  background: var(--olive-900);
-  color: var(--paper);
+  border-color: var(--ph-ink);
+  background: var(--ph-ink);
+  color: var(--olive-900);
+}
+.org-bar :focus-visible,
+.org-hero :focus-visible {
+  outline-color: var(--ph-ink) !important;
 }
 
 /* Script headings with rays, as on the RSVP letter. */
@@ -1765,8 +1786,15 @@ body.ph-scroll-on .simple-rsvp.rsvp-section {
   background: linear-gradient(to bottom, var(--card-bg) 50%, var(--frame-outside) 50%);
 }
 
-/* Sign-in: a menu card with the croissant plate and cup, like the RSVP letter. */
+/* Sign-in: the sand menu card on green, like the RSVP letter seen through
+   the hero's window. */
+.org-login-page {
+  --frame-outside: var(--olive-900);
+  background: var(--olive-900);
+}
 .org-login {
+  min-height: calc(100vh - 4rem);
+  min-height: calc(100svh - 4rem);
   padding: 5.5rem var(--gutter) 4rem;
 }
 .org-card {
@@ -1822,26 +1850,44 @@ body.ph-scroll-on .simple-rsvp.rsvp-section {
   text-align: left;
 }
 
-/* Dashboard */
-.org-page .organiser {
-  padding: 1.5rem 0 4rem;
+/* Dashboard: a green hero band, then the sand page. */
+.org-hero {
+  background: var(--olive-900);
+  color: var(--ph-ink);
 }
 .org-page .org-head {
   align-items: flex-end;
-  margin-bottom: 1.25rem;
+  flex-wrap: nowrap;
+  gap: 1.5rem;
+  margin: 0;
+  padding-top: 2.5rem;
+  padding-bottom: 2.25rem;
 }
 .org-eyebrow {
-  margin: 0 0 0.6rem;
-  color: var(--olive-700);
+  margin: 0 0 0.9rem;
+  color: var(--ph-ink-2);
   font-size: 0.95rem;
 }
 .org-title {
   margin: 0;
+  color: var(--ph-ink);
   font-size: clamp(2.6rem, 9vw, 5.6rem) !important;
   font-weight: 800 !important;
   letter-spacing: -0.045em;
   line-height: 0.85;
   text-transform: uppercase;
+  white-space: nowrap;
+}
+/* The hairline between the copy and the button on the home hero. */
+.org-rule {
+  flex: 1;
+  align-self: center;
+  height: 1px;
+  margin-top: 2.2rem;
+  background: var(--ph-rule);
+}
+.org-page .organiser {
+  padding: 1.75rem 0 4rem;
 }
 .org-btn {
   display: inline-flex;
@@ -1956,6 +2002,15 @@ body.ph-scroll-on .simple-rsvp.rsvp-section {
   .org-page .org-head {
     flex-direction: column;
     align-items: flex-start;
+  }
+  .org-title {
+    white-space: normal;
+  }
+  .org-rule {
+    display: none;
+  }
+  .org-bar-date {
+    display: none;
   }
   .org-page .search {
     width: 100%;

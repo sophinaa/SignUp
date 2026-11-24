@@ -4,7 +4,7 @@ export const esc = (value) =>
   String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
 // Bump when CSS/JS change so phones don't keep a stale cached copy.
-const ASSET_VERSION = '13';
+const ASSET_VERSION = '14';
 
 // ---- Illustrations (decorative, hidden from screen readers) ---------------------
 
@@ -358,19 +358,24 @@ ${footer(ev)}`;
 }
 
 // ---- Organiser pages ------------------------------------------------------------
-// Styled like the home page: Inter type, script headings with mustard rays and
-// the café menu card (see .org-page in site.css).
+// Styled like the home page: a cream-on-green hero over the sand letter colour,
+// Inter type, script headings with mustard rays and the café menu card
+// (see .org-page in site.css).
 
 const scriptHeading = (tag, id, text, extra = '') =>
   `<${tag} id="${id}" class="org-script">${RAYS.replace('class="rays"', 'class="rays rays-left"')}${RAYS.replace('class="rays"', 'class="rays rays-right"')}${text}${extra}</${tag}>`;
 
-function organiserBar({ signOut }) {
-  return `<header class="org-bar">
+// Cream-on-green nav, as on the home page hero.
+function organiserBar({ signOut, dateLabel }) {
+  return `<nav class="org-bar" aria-label="Main">
   <div class="wrap wide org-bar-inner">
-    <a class="org-brand" href="/">Shared Light Café</a>
+    <div class="org-bar-links">
+      <a class="org-brand" href="/">Shared Light Café</a>
+      ${dateLabel ? `<span class="org-bar-date">${esc(dateLabel)}</span>` : ''}
+    </div>
     ${signOut ? '<form method="post" action="/organiser/logout"><button type="submit" class="org-link-btn">Sign out</button></form>' : '<span class="org-bar-tag">Organisers</span>'}
   </div>
-</header>`;
+</nav>`;
 }
 
 export function loginPage({ error, configured }) {
@@ -395,21 +400,23 @@ export function loginPage({ error, configured }) {
     ${CUP}
   </div>
 </main>`;
-  return layout({ title: 'Organiser sign in · Shared Light Café', description: 'Organiser access', body, bodyClass: 'org-page', noindex: true });
+  return layout({ title: 'Organiser sign in · Shared Light Café', description: 'Organiser access', body, bodyClass: 'org-page org-login-page', noindex: true, themeColor: '#414522' });
 }
 
 export function organiserPage(ev) {
-  const body = `${organiserBar({ signOut: true })}
+  const body = `<header class="org-hero">
+  ${organiserBar({ signOut: true, dateLabel: ev.dateLabel })}
+  <div class="wrap wide org-head">
+    <div>
+      <p class="org-eyebrow">Time: ${esc(ev.timeLabel)} · Venue: ${esc(ev.venueLabel)}</p>
+      <h1 class="org-title">Who’s coming</h1>
+    </div>
+    <span class="org-rule" aria-hidden="true"></span>
+    <a class="org-btn" href="/organiser/export.csv" download>Download CSV</a>
+  </div>
+</header>
 <main id="main" class="organiser">
   <div class="wrap wide">
-    <div class="org-head">
-      <div>
-        <p class="org-eyebrow">${esc(ev.dateLabel)} · Time: ${esc(ev.timeLabel)} · Venue: ${esc(ev.venueLabel)}</p>
-        <h1 class="org-title">Who’s coming</h1>
-      </div>
-      <a class="org-btn" href="/organiser/export.csv" download>Download CSV</a>
-    </div>
-
     <p id="org-status" class="org-status" role="status" aria-live="polite">Loading RSVPs…</p>
 
     <section aria-labelledby="stats-title">
@@ -455,5 +462,5 @@ export function organiserPage(ev) {
     </section>
   </div>
 </main>`;
-  return layout({ title: 'Organiser view · Shared Light Café', description: 'Organiser view', body, scripts: ['/js/organiser.js'], bodyClass: 'org-page', noindex: true });
+  return layout({ title: 'Organiser view · Shared Light Café', description: 'Organiser view', body, scripts: ['/js/organiser.js'], bodyClass: 'org-page', noindex: true, themeColor: '#414522' });
 }
